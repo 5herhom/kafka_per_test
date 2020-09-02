@@ -35,7 +35,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>cn.com.sherhom.reno.kafka.LogTest</mainClass>
+                            <mainClass>cn.com.sherhom.reno.kafka.producer.RenoProducerMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

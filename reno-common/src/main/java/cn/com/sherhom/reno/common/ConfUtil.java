@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -16,27 +15,35 @@ public class ConfUtil {
     static private final List<String> CONFIG_DIR_PATH = Stream.of(
             ".","config/"
     ).collect(Collectors.toList());
-    static private final String FILE_NAME="application.properties";
-    static private final String BASE_PATH=System.getProperty("reno.config.path","");
+    static private final String FILE_NAME="application";
+    static private final String FILE_SUFFIX=".properties";
+    static private final String BASE_PATH=System.getProperty("reno.config.path","/");
+    private static final String ACTIVE_PROFILE_KEY="sherhom.profiles.active";
     private static synchronized void load(){
         if(properties!=null)
             return;
+        properties=new Properties();
+        load(FILE_NAME+FILE_SUFFIX);
+        String activeProfile=System.getProperty("sherhom.profiles.active","office");
+        load(FILE_NAME+"-"+activeProfile+FILE_SUFFIX);
+    }
+    private static void load(String fileName){
         String path;
+        Properties pros=new Properties();
         for(String dir: CONFIG_DIR_PATH){
             InputStream in= null;
             try {
-                path=BASE_PATH+dir+"/"+FILE_NAME;
-                URL url=ConfUtil.class.getClassLoader().getResource(path);
-                if(url==null){
+                path=StringUtils.cleanPath(BASE_PATH+"/"+dir+"/"+fileName);
+//                path=StringUtils.cleanPath("/application.properties");
+                InputStream inputStream=ConfUtil.class.getResourceAsStream(path);
+                if(inputStream==null){
                     log.info("Config file is not existed in [{}]",path);
                     continue;
                 }
-                in = new FileInputStream(url.getFile());
-                Properties pros=new Properties();
-                pros.load(in);
-                properties=pros;
+//                in = new FileInputStream(inputStream);
+                pros.load(inputStream);
                 log.info("Config is found in {}",path);
-                return;
+                break;
             } catch (FileNotFoundException e) {
                 log.warn(e.getMessage());
             } catch (IOException e) {
@@ -46,10 +53,14 @@ public class ConfUtil {
                 IOUtils.closeQuietly(in);
             }
         }
-        if(properties==null){
-            log.error("Not config file is found.");
+        if(pros==null){
+            log.error("Config file [{}] is found.",fileName);
             SystemUtil.exit();
         }
+        if(properties==null){
+            properties=new Properties();
+        }
+        properties.putAll(pros);
     }
     public static String get(String key,String defaultValue){
         if(properties==null){
