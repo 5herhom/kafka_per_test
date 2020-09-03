@@ -11,6 +11,7 @@
     <modules>
         <module>reno-kafka</module>
         <module>reno-common</module>
+        <module>reno-boot</module>
     </modules>
     <properties>
         <fastJson.version>1.2.70</fastJson.version>
