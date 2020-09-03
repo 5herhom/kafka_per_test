@@ -1,6 +1,6 @@
 package cn.com.sherhom.reno.kafka.producer;
 
-import cn.com.sherhom.reno.common.ConfUtil;
+import cn.com.sherhom.reno.common.utils.ConfUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

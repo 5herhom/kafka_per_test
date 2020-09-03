@@ -1,4 +1,4 @@
-package cn.com.sherhom.reno.common;
+package cn.com.sherhom.reno.common.utils;
 
 
 import java.util.*;
@@ -35,6 +35,11 @@ public class StringUtils {
                 if (pathToUse.startsWith("/")) {
                     prefix = prefix + "/";
                     pathToUse = pathToUse.substring(1);
+                }
+                else if(pathToUse.startsWith("./")){
+                    prefix = prefix + "./";
+                    pathToUse = pathToUse.substring(2);
+
                 }
 
                 String[] pathArray = delimitedListToStringArray(pathToUse, "/");
@@ -189,5 +194,12 @@ public class StringUtils {
             sb.append(s);
         }
         return sb.toString();
+    }
+    public static String dirPathEnd(String path){
+        if(path==null)
+            return null;
+        if(path.equals(""))
+            return "";
+        return path.endsWith("/")||path.endsWith("\\")?path:path+"/";
     }
 }
