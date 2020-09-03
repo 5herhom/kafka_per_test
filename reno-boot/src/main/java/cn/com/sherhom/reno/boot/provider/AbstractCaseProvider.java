@@ -3,7 +3,7 @@ package cn.com.sherhom.reno.boot.provider;
 import cn.com.sherhom.reno.boot.function.StepForward;
 
 public abstract class AbstractCaseProvider<T> implements CaseProvider<T> {
-    protected StepForward<T> stepForward;
+    protected StepForward<T,Long> stepForward;
 
     public AbstractCaseProvider() {
     }

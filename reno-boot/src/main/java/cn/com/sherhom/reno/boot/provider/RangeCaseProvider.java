@@ -12,10 +12,10 @@ public class RangeCaseProvider<T> extends AbstractCaseProvider<T> implements Cas
         this.start = start;
         this.end = end;
         this.step = step;
-        this.stepForward=()->(T)(Long.valueOf(this.cur+this.step));
+        this.stepForward=(i)->(T)(Long.valueOf(i+this.step));
     }
 
-    public RangeCaseProvider(StepForward<T> stepForward, Long start, Long end, Long step) {
+    public RangeCaseProvider(StepForward<T,Long> stepForward, Long start, Long end, Long step) {
         super(stepForward);
         this.start = start;
         this.end = end;
@@ -24,11 +24,18 @@ public class RangeCaseProvider<T> extends AbstractCaseProvider<T> implements Cas
 
     @Override
     public T next() {
-        return stepForward.goForward();
+        T e=stepForward.goForward(cur);
+        cur+=this.step;
+        return e;
     }
 
     @Override
     public boolean hasNext() {
         return cur<=end;
+    }
+
+    @Override
+    public void reset() {
+        this.cur=start;
     }
 }

@@ -22,7 +22,7 @@ public class ProviderBuilder<T> {
     Long start;
     Long end;
     Long step;
-    StepForward<T> stepForward;
+    StepForward<T,Long> stepForward;
     public CaseProvider<T> build(){
         switch (this.providerType){
             case VALUE:
@@ -36,7 +36,7 @@ public class ProviderBuilder<T> {
                 throw new RenoException("Please enter current type.");
         }
     }
-    public ProviderBuilder<T> FieldType(ProviderType providerType){
+    public ProviderBuilder<T> fieldType(ProviderType providerType){
         this.providerType = providerType;
         return this;
     }
@@ -65,7 +65,7 @@ public class ProviderBuilder<T> {
         this.step=step;
         return this;
     }
-    public ProviderBuilder<T> stepForward(StepForward<T> stepForward){
+    public ProviderBuilder<T> stepForward(StepForward<T,Long> stepForward){
         checkType(RANGE);
         this.stepForward=stepForward;
         return this;

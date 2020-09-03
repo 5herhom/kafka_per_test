@@ -20,4 +20,9 @@ public class ListCaseProvider<T> implements CaseProvider<T> {
     public boolean hasNext() {
         return it.hasNext();
     }
+
+    @Override
+    public void reset() {
+        this.it=cases.iterator();
+    }
 }

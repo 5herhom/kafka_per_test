@@ -18,7 +18,7 @@ public class RenoApplication {
 
     }
 
-    public static void run(Object fairyland, List<CaseProvider> providers) {
+    public void run(Object fairyland, List<CaseProvider> providers) {
         if(fairyland==null){
             log.error("Fairyland is null.");
             throw new RenoException("Fairyland is null.");
@@ -43,29 +43,17 @@ public class RenoApplication {
         run(fairyland,methodToExplore,providers);
     }
 
-    public static void run(Object fairyland,Method methodToExplore,List<CaseProvider> providers){
+    public void run(Object fairyland,Method methodToExplore,List<CaseProvider> providers){
         int deep=0;
-        if(deep==providers.size()){
-            methodToExplore.setAccessible(true);
-            try {
-                methodToExplore.invoke(fairyland);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
-            finally {
-                return;
-            }
-        }
         List args=new ArrayList();
         run(fairyland,methodToExplore,providers,args,deep);
     }
-    public static void run(Object fairyland, Method methodToExplore, List<CaseProvider> providers, List<Object> args, int deep){
+    public void run(Object fairyland, Method methodToExplore, List<CaseProvider> providers, List<Object> args, int deep){
         if(deep==providers.size()){
             methodToExplore.setAccessible(true);
             try {
-                methodToExplore.invoke(fairyland,args);
+                methodToExplore.invoke(fairyland, args.toArray());
+                return;
             } catch (Exception e) {
                 e.printStackTrace();
                 try {
@@ -75,12 +63,16 @@ public class RenoApplication {
                     e.printStackTrace();
                     throw new RenoException(e1);
                 }
+                return;
             }
         }
-        CaseProvider provider=providers.get(deep-1);
+        CaseProvider provider=providers.get(deep);
         while (provider.hasNext()){
-            args.add(provider.next());
-            run(fairyland,methodToExplore,providers,args,deep);
+            Object arg=provider.next();
+            args.add(arg);
+            run(fairyland,methodToExplore,providers,args,deep+1);
+            args.remove(args.size()-1);
         }
+        provider.reset();
     }
 }
