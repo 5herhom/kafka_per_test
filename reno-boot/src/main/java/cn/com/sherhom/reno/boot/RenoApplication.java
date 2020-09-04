@@ -12,12 +12,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Sherhom
+ * @date 2020/9/3 20:12
+ */
 @Slf4j
 public class RenoApplication {
-    public static void main(String[] args) {
-
-    }
-
     public void run(Object fairyland, List<CaseProvider> providers) {
         if(fairyland==null){
             log.error("Fairyland is null.");

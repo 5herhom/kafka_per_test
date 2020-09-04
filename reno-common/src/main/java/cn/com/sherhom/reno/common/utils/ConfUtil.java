@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+/**
+ * @author Sherhom
+ * @date 2020/9/2 20:12
+ */
 @Slf4j
 public class ConfUtil {
 

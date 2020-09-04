@@ -6,7 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import static cn.com.sherhom.reno.common.contants.ProtocolType.FILE_PROTOCOL;
-
+/**
+ * @author Sherhom
+ * @date 2020/9/2 20:12
+ */
 public class FileLoader extends AbstractURLLoader {
     File file;
     public FileLoader(String path) {

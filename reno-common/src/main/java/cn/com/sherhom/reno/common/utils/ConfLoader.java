@@ -16,7 +16,10 @@ import java.util.stream.Stream;
 
 import static cn.com.sherhom.reno.common.contants.ConfKey.*;
 import static cn.com.sherhom.reno.common.contants.ProtocolType.CLASSPATH_PROTOCOL;
-
+/**
+ * @author Sherhom
+ * @date 2020/9/2 20:12
+ */
 @Slf4j
 public class ConfLoader {
     static private final List<String> CONFIG_DIR_PATH = Stream.of(

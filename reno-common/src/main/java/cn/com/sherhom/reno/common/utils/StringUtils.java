@@ -2,7 +2,10 @@ package cn.com.sherhom.reno.common.utils;
 
 
 import java.util.*;
-
+/**
+ * @author Sherhom
+ * @date 2020/9/2 20:12
+ */
 public class StringUtils {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     private static final String FOLDER_SEPARATOR = "/";

@@ -1,5 +1,8 @@
 package cn.com.sherhom.reno.boot.provider;
-
+/**
+ * @author Sherhom
+ * @date 2020/9/3 20:12
+ */
 public class ValueCaseProvider<T> extends AbstractCaseProvider<T> implements CaseProvider<T> {
 
     T value;

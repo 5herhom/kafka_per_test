@@ -1,7 +1,10 @@
 package cn.com.sherhom.reno.common.utils;
 
 import cn.com.sherhom.reno.common.exception.RenoException;
-
+/**
+ * @author Sherhom
+ * @date 2020/9/2 20:12
+ */
 public class Asset {
     public static void throwException(String msg){
         throw new RenoException(msg);

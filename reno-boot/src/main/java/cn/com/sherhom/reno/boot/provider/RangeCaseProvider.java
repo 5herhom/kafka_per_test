@@ -1,7 +1,10 @@
 package cn.com.sherhom.reno.boot.provider;
 
 import cn.com.sherhom.reno.boot.function.StepForward;
-
+/**
+ * @author Sherhom
+ * @date 2020/9/3 20:12
+ */
 public class RangeCaseProvider<T> extends AbstractCaseProvider<T> implements CaseProvider<T> {
     Long start;
     Long end;
