@@ -4,6 +4,7 @@ import cn.com.sherhom.reno.boot.annonation.ToExplore;
 import cn.com.sherhom.reno.boot.provider.CaseProvider;
 import cn.com.sherhom.reno.boot.provider.ProviderBuilder;
 import cn.com.sherhom.reno.common.exception.RenoException;
+import cn.com.sherhom.reno.common.utils.LogUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
@@ -55,12 +56,12 @@ public class RenoApplication {
                 methodToExplore.invoke(fairyland, args.toArray());
                 return;
             } catch (Exception e) {
-                e.printStackTrace();
+                LogUtil.printStackTrace(e);
                 try {
                     //TODO handle exception
                 }
                 catch (Exception e1){
-                    e.printStackTrace();
+                    LogUtil.printStackTrace(e);
                     throw new RenoException(e1);
                 }
                 return;

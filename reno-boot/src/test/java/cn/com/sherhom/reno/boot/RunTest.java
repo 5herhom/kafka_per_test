@@ -3,6 +3,8 @@ package cn.com.sherhom.reno.boot;
 import cn.com.sherhom.reno.boot.annonation.ToExplore;
 import cn.com.sherhom.reno.boot.provider.CaseProvider;
 import cn.com.sherhom.reno.boot.provider.ProviderBuilder;
+import cn.com.sherhom.reno.common.exception.RenoException;
+import cn.com.sherhom.reno.common.utils.LogUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -34,6 +36,17 @@ public class RunTest {
         @ToExplore
         public void println(String s,Long l,Integer i,Long s2){
             log.info("result:{},{},{},{}",s,l,i,s2);
+        }
+    }
+
+    @Test
+    public void logTest(){
+        log.info("startlog");
+        try{
+
+            throw new RenoException("aaaa");
+        } catch (Exception e) {
+            LogUtil.printStackTrace(e);
         }
     }
 }

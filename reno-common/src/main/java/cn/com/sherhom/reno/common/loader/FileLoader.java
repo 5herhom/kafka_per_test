@@ -1,5 +1,7 @@
 package cn.com.sherhom.reno.common.loader;
 
+import cn.com.sherhom.reno.common.utils.LogUtil;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,7 +28,7 @@ public class FileLoader extends AbstractURLLoader {
         try{
             return new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LogUtil.printStackTrace(e);
             return null;
         }
     }
