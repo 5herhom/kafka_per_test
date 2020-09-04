@@ -1,20 +1,20 @@
 package cn.com.sherhom.reno.kafka.common.utils;
 
 import cn.com.sherhom.reno.common.utils.Asset;
+import cn.com.sherhom.reno.common.utils.LogUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * @author Sherhom
  * @date 2020/9/4 10:34
  */
 @Slf4j
-public class ZkUtils {
+public class ZkUtil {
     private static final String DEFAULT_CODE="utf-8";
     private static String getZkConnStr(CuratorFramework curatorFramework){
         try{
@@ -39,8 +39,8 @@ public class ZkUtils {
             return null;
         }
     }
-    public static List<String> getChildrenData(CuratorFramework curator,String path){
-        List<String> ret= new ArrayList<>();
+    public static<R> Map<String,R> getChildrenData(CuratorFramework curator, String path, Function<String,R> handler){
+        Map<String,R> path2value=new HashMap<>();
         String emptyMsg=noPathMsg(path);
         String noChildMsg=noChildMsg(path);
         try {
@@ -53,21 +53,21 @@ public class ZkUtils {
                 byte[] bytes=curator.getData().forPath(pathTmp);
                 String value = new String(bytes,DEFAULT_CODE);
                 if(StringUtils.isNotBlank(value)){
-                    ret.add(value);
+                    path2value.put(child,handler.apply(value));
                 }
             }
         } catch (Exception e) {
             LogUtil.printStackTrace(e);
-            return new ArrayList<>();
+            return  new HashMap<>();
         }
-        return ret;
+        return path2value;
 
     }
-
     private static String noPathMsg(String path){
-        return String.format("path[{}] is not existed at zk.",path);
+        return String.format("path[%s] is not existed at zk.",path);
     }
     private static String noChildMsg(String path){
-        return String.format("path[{}] has no children at zk.",path);
+        return String.format("path[%s] has no children at zk.",path);
     }
+
 }

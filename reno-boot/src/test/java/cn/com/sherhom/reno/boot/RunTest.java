@@ -46,7 +46,7 @@ public class RunTest {
 
             throw new RenoException("aaaa");
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            LogUtil.printStackTrace(new RenoException("bbb"));
         }
     }
 }

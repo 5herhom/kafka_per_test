@@ -19,7 +19,7 @@ public class Asset {
             throwException(msg);
     }
     public static void isNotBlank(String s,String msg) {
-        if(StringUtils.isNotBlank(s))
+        if(!StringUtils.isNotBlank(s))
             throwException(msg);
     }
     public static void isTrue(boolean flag,String msg){
