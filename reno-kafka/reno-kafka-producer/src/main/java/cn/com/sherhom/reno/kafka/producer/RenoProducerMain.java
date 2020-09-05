@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RenoProducerMain {
     public static void main(String[] args) {
+
         log.info(ConfUtil.get("sherhom.test.port"));
     }
 }

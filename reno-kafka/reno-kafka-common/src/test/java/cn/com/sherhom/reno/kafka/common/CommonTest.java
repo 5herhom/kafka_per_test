@@ -12,13 +12,13 @@ import org.junit.Test;
 public class CommonTest {
     @Test
     public void topicSimpleInfoTest(){
-        String zkServers="106.54.25.205:2181,47.96.65.208:2181,150.158.119.99:2181";
+        String zkServers="47.96.65.208:2181,150.158.119.99:2181";
         log.info(KfkOperate.getTopicSimpleInfo(zkServers,
                 "HZY_TEST").toString());
     }
     @Test
     public void addPartitionTest(){
-        String zkServers="106.54.25.205:2181,47.96.65.208:2181,150.158.119.99:2181";
+        String zkServers="47.96.65.208:2181,150.158.119.99:2181";
         String topicName="HZY_TEST";
         log.info("Result:{}",KfkOperate.expandPartitions(zkServers,topicName,7));
     }
