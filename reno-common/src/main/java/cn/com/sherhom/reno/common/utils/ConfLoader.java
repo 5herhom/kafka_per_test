@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -27,8 +28,8 @@ public class ConfLoader {
     ).collect(Collectors.toList());
     private static final String FILE_NAME="application";
     private static final String FILE_SUFFIX=".properties";
-    private static final String BASE_PATH=System.getProperty(BASE_PATH_KEY,"/");
-    private static final String CONFIG_FILE_PROTOCOL=System.getProperty(FILE_PROTOCOL_KEY,CLASSPATH_PROTOCOL);
+    private static final String BASE_PATH=System.getProperty(BASE_PATH_KEY,"classpath:/");
+//    private static final String CONFIG_FILE_PROTOCOL=System.getProperty(FILE_PROTOCOL_KEY,CLASSPATH_PROTOCOL);
 
     public static void load(){
         if(ConfUtil.properties!=null)
@@ -54,7 +55,7 @@ public class ConfLoader {
                         StringUtils.dirPathEnd(BASE_PATH)+
                                 StringUtils.dirPathEnd(dir)+
                                 fileName);
-                urlLoader= URLLoaderFactory.getInstance(CONFIG_FILE_PROTOCOL,path);
+                urlLoader= URLLoaderFactory.getInstance(path);
                 InputStream inputStream=urlLoader.getInStream();
                 if(inputStream==null){
                     log.info("Config file is not existed in [{}]",urlLoader.getUrl());
@@ -67,6 +68,7 @@ public class ConfLoader {
             } catch (FileNotFoundException e) {
                 log.warn(e.getMessage());
             } catch (IOException e) {
+                LogUtil.printStackTrace(e);
                 log.warn(e.getMessage());
             }
             finally {
