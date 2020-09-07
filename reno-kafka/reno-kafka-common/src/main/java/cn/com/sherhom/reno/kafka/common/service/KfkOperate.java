@@ -12,6 +12,8 @@ import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.apache.curator.framework.CuratorFramework;
 
+import java.util.Properties;
+
 /**
  * @author Sherhom
  * @date 2020/9/4 10:12
@@ -36,5 +38,17 @@ public class KfkOperate {
         ZkClient zkClient = ZkUtils.createZkClient(zkServers, 10 * 1000, 8 * 1000);
         ZkUtils zkUtils = new ZkUtils(zkClient, new ZkConnection(zkServers), false);
         return KfkOperate4scala.addPartition(topicName,zkUtils,newNum);
+    }
+
+    public static boolean createTopic(TopicSimpleInfo simpleInfo, Properties config){
+        ZkClient zkClient=ZkUtils.createZkClient(simpleInfo.getZkServers(),10*1000,8*1000);
+        ZkUtils zkUtils=new ZkUtils(zkClient,new ZkConnection(simpleInfo.getZkServers()),false);
+        KfkOperate4scala.addTopic(simpleInfo.getTopicName(),zkUtils,simpleInfo.getPartNum(),
+                simpleInfo.getReplicationNum(),config);
+        zkUtils.close();
+        return true;
+    }
+    public static boolean createTopic(TopicSimpleInfo simpleInfo){
+        return createTopic(simpleInfo,new Properties());
     }
 }

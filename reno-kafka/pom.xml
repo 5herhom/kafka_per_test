@@ -29,10 +29,6 @@
     <dependencies>
         <dependency>
             <groupId>cn.com.sherhom</groupId>
-            <artifactId>reno-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.com.sherhom</groupId>
             <artifactId>reno-boot</artifactId>
         </dependency>
         <dependency>

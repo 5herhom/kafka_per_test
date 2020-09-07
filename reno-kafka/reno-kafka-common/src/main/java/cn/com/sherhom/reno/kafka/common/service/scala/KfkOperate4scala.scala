@@ -1,7 +1,9 @@
 package cn.com.sherhom.reno.kafka.common.service.scala
 
+import java.util.Properties
+
 import cn.com.sherhom.reno.common.exception.RenoException
-import kafka.admin.AdminUtils
+import kafka.admin.{AdminUtils, RackAwareMode}
 import kafka.server.ConfigType
 import kafka.utils.ZkUtils
 
@@ -17,6 +19,16 @@ object KfkOperate4scala {
       return false
     val allBrokers = AdminUtils.getBrokerMetadatas(zkUtils)
     AdminUtils.addPartitions(zkUtils, topicName, existingAssignment, allBrokers, nPartitions)
+    true
+  }
+  def addTopic(topic:String,zkUtils:ZkUtils,partitions:Int,configs:Properties):Boolean={
+    val rackAwareMode=RackAwareMode.Disabled
+    AdminUtils.createTopic(zkUtils,topic,partitions,2,configs,rackAwareMode)
+    true
+  }
+  def addTopic(topic:String,zkUtils:ZkUtils,partitions:Int,replicas:Int,configs:Properties):Boolean={
+    val rackAwareMode=RackAwareMode.Disabled
+    AdminUtils.createTopic(zkUtils,topic,partitions,replicas,configs,rackAwareMode)
     true
   }
 }

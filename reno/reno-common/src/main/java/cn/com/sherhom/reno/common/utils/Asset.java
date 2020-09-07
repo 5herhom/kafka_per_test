@@ -1,6 +1,7 @@
 package cn.com.sherhom.reno.common.utils;
 
 import cn.com.sherhom.reno.common.exception.RenoException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
@@ -9,6 +10,7 @@ import java.util.Collection;
  * @author Sherhom
  * @date 2020/9/2 20:12
  */
+@Slf4j
 public class Asset {
     public static void notNull(Object o,String msg) {
         if(o==null)
@@ -37,6 +39,7 @@ public class Asset {
             throwException(msg);
     }
     public static void throwException(String msg){
+        log.error(msg);
         throw new RenoException(msg);
     }
 }
