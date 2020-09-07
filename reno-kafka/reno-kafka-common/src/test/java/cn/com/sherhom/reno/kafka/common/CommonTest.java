@@ -31,7 +31,7 @@ public class CommonTest {
         param.setTopicName("HZY_TEST_2020-09-07");
         param.setPartNum(3);
         param.setReplicationNum(2);
-        param.setZkServers(KfkConf.getZkIp());
+        param.setZkServers(KfkConf.zkIp());
 
         log.info("Result:{}",KfkOperate.createTopic(param));
 

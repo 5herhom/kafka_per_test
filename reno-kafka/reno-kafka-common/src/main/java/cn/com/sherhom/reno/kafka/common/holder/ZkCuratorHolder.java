@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.RetryUntilElapsed;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,8 +31,8 @@ public class ZkCuratorHolder {
                 if(cluster2zk.get(zkServers)!=null)
                     return cluster2zk.get(zkServers);
                 CuratorFramework curator= CuratorFrameworkFactory.builder().connectString(zkServers)
-                        .retryPolicy(new RetryUntilElapsed(KfkConf.getZkMaxWaitTime(),KfkConf.getZkMaxRetry()))
-                        .connectionTimeoutMs(KfkConf.getZkMaxWaitTime()).build();
+                        .retryPolicy(new RetryUntilElapsed(KfkConf.zkMaxWaitTime(),KfkConf.zkMaxRetry()))
+                        .connectionTimeoutMs(KfkConf.zkMaxWaitTime()).build();
                 curator.getConnectionStateListenable().addListener((client, state) -> {
                     String currentConnectionString=client.getZookeeperClient().getCurrentConnectionString();
                     if(state==ConnectionState.LOST){

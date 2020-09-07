@@ -11,6 +11,13 @@
     <packaging>jar</packaging>
 
     <artifactId>reno-kafka-consumer</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>cn.com.sherhom</groupId>
+            <artifactId>reno-kafka-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <!-- Includes the runtime dependencies -->

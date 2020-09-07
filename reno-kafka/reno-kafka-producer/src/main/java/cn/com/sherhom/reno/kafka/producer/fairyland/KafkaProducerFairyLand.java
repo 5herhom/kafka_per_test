@@ -14,7 +14,7 @@ import java.util.List;
 public class KafkaProducerFairyLand {
     public static final String topicFormat =
             "RENO_TEST_TOPIC_PARTITION_%s_%s";
-    public static final String zkServer = KfkConf.getZkIp();
+    public static final String zkServer = KfkConf.zkIp();
 
     @ToExplore
     public void entrance(int topicNum,
@@ -34,6 +34,7 @@ public class KafkaProducerFairyLand {
             prepareTopic(topic, partitionNum);
             topics.add(topic);
         }
+        //create threads
         ProducerRunnerArgs proArgs;
         for (int i = 0; i < producerNum; i++) {
             proArgs = new ProducerRunnerArgs();
@@ -49,7 +50,7 @@ public class KafkaProducerFairyLand {
             param.setTopicName(topicName);
             param.setPartNum(partitionNum);
             param.setReplicationNum(2);
-            param.setZkServers(KfkConf.getZkIp());
+            param.setZkServers(KfkConf.zkIp());
             Asset.isTrue(KfkOperate.createTopic(param),
                     String.format("Topic[{}] create error.", topicName));
         } else if (topicSimpleInfo.getPartNum() < partitionNum) {
