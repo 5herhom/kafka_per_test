@@ -16,6 +16,9 @@ import java.util.stream.Stream;
 public class ConfUtil {
 
     static volatile Properties properties;
+    public static int getInt(String key,Object defaultValue){
+        return Integer.valueOf(get(key,defaultValue.toString()));
+    }
     public static String get(String key,String defaultValue){
         if(properties==null){
             ConfLoader.load();
