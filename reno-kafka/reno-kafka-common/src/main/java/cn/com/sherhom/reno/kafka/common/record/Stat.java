@@ -1,5 +1,8 @@
 package cn.com.sherhom.reno.kafka.common.record;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -19,7 +22,7 @@ public class Stat {
     private volatile boolean failed;
     private long startTime;
     private volatile boolean started=false;
-    private AtomicLong bytes;
+    private AtomicLong totalBytes;
     private AtomicLong totalLatency;
     private AtomicInteger msg;
     private AtomicLong maxLatency;
@@ -33,10 +36,10 @@ public class Stat {
     private ConcurrentLinkedDeque<Integer> indexList;
 
     private CountDownLatch countDownLatch;
-    public Stat(long bytes,int msg,long reportingInterval,int threadNum) {
+    public Stat(long totalBytes, int msg, long reportingInterval, int threadNum) {
         this.startTime =System.currentTimeMillis();
         this.failed =false;
-        this.bytes =new AtomicLong(bytes);
+        this.totalBytes =new AtomicLong(totalBytes);
         this.reportingInterval=reportingInterval;
         this.totalLatency =new AtomicLong(0);
         this.msg =new AtomicInteger(msg);
@@ -72,7 +75,7 @@ public class Stat {
     public void record(int index,long bytes,int msg,long latency){
         long stamp=stampedLock.readLock();
         try{
-            this.bytes.addAndGet(bytes);
+            this.totalBytes.addAndGet(bytes);
             this.msg.addAndGet(msg);
             this.totalLatency.addAndGet(latency);
             this.maxLatency.set(Math.max(latency,this.maxLatency.longValue()));
@@ -90,8 +93,8 @@ public class Stat {
         }
     }
 
-    public AtomicLong getBytes() {
-        return bytes;
+    public AtomicLong getTotalBytes() {
+        return totalBytes;
     }
 
     public AtomicLong getTotalLatency() {
@@ -132,15 +135,38 @@ public class Stat {
             "win_total_latency(ms):%s";
     public void printWindows(){;
         long ellapsed = System.currentTimeMillis() - windowStart;
-        log.info(String.format(winFormat,
-                windowMaxLatency,
+        log.info(windowsMgs());
+    }
+    public String windowsMgs(){
+        Metric metric = windowsMetric();
+        return String.format(winFormat,
+                metric.getMaxLatency(),
+                metric.getTotalBytes(),
+                metric.getBytePerSec(),
+                metric.getTotalCount(),
+                metric.getCountPerSec(),
+                metric.getTotalLatency());
+    }
+    public Metric windowsMetric(){
+        long ellapsed = System.currentTimeMillis() - windowStart;
+        return new Metric(windowMaxLatency,
                 windowBytes.longValue(),
                 windowBytes.longValue()/(ellapsed/1000.0),
                 windowCount.intValue(),
                 windowCount.intValue()/(ellapsed/1000.0),
-                windowTotalLatency));
+                windowTotalLatency.longValue());
     }
-
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    class Metric{
+        long maxLatency;
+        long totalBytes;
+        double bytePerSec;
+        long totalCount;
+        double countPerSec;
+        long totalLatency;
+    }
     private static final String sFormat=
             "maxLatency(ms):%s " +
             "total_byte:%s " +
@@ -148,20 +174,43 @@ public class Stat {
             "total_msg:%s " +
             "msg/s:%s " +
             "total_latency(ms):%s";
-    public synchronized void printTotal(){
+    public void printTotal(){
+       log.info(totalMsg());
+    }
+    public String totalMsg(){
         long stamp=stampedLock.writeLock();
         long ellapsed = System.currentTimeMillis() - startTime;
+        String res;
         try {
             //windowCount:%s latency(ms):%s maxLatency(ms):%s byte/s:%s msg/s:%s
-            log.info(String.format(sFormat,
+            res=String.format(sFormat,
                     maxLatency.longValue(),
-                    bytes.longValue(),
-                    bytes.longValue()/(ellapsed/1000.0),
+                    totalBytes.longValue(),
+                    totalBytes.longValue()/(ellapsed/1000.0),
                     msg.intValue(),
                     msg.intValue()/(ellapsed/1000.0),
-                    totalLatency));
+                    totalLatency);
         }finally {
-           stampedLock.unlockWrite(stamp);
+            stampedLock.unlockWrite(stamp);
         }
+        return res;
+    }
+    public Metric totalMetric(){
+        long stamp=stampedLock.writeLock();
+        long ellapsed = System.currentTimeMillis() - startTime;
+        Metric res;
+        try {
+            //windowCount:%s latency(ms):%s maxLatency(ms):%s byte/s:%s msg/s:%s
+            res=new Metric(
+                    maxLatency.longValue(),
+                    totalBytes.longValue(),
+                    totalBytes.longValue()/(ellapsed/1000.0),
+                    msg.intValue(),
+                    msg.intValue()/(ellapsed/1000.0),
+                    totalLatency.longValue());
+        }finally {
+            stampedLock.unlockWrite(stamp);
+        }
+        return res;
     }
 }
