@@ -3,6 +3,7 @@ package cn.com.sherhom.reno.kafka.common.record;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
@@ -16,6 +17,8 @@ public class Stat {
 
     private final StampedLock stampedLock = new StampedLock();
     private volatile boolean failed;
+    private long startTime;
+    private volatile boolean started=false;
     private AtomicLong bytes;
     private AtomicLong totalLatency;
     private AtomicInteger msg;
@@ -28,7 +31,10 @@ public class Stat {
     private AtomicLong windowBytes;
     private long reportingInterval;
     private ConcurrentLinkedDeque<Integer> indexList;
-    public Stat(long bytes,int msg,long reportingInterval) {
+
+    private CountDownLatch countDownLatch;
+    public Stat(long bytes,int msg,long reportingInterval,int threadNum) {
+        this.startTime =System.currentTimeMillis();
         this.failed =false;
         this.bytes =new AtomicLong(bytes);
         this.reportingInterval=reportingInterval;
@@ -38,8 +44,25 @@ public class Stat {
         this.maxLatency =new AtomicLong(0);
         this.indexList=new ConcurrentLinkedDeque();
         this.newWindows();
+        countDownLatch=new CountDownLatch(threadNum);
     }
-
+    public void start(){
+        countDownLatch.countDown();
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if(!started){
+            synchronized (countDownLatch){
+                if(!started){
+                    this.startTime =System.currentTimeMillis();
+                    started=true;
+                }
+            }
+        }
+        log.info("Thread:{} started stat",Thread.currentThread().getName());
+    }
     public boolean isFailed() {
         return failed;
     }
@@ -89,7 +112,6 @@ public class Stat {
         this.windowMaxLatency = 0;
         this.windowTotalLatency =  new AtomicLong(0);
         this.windowBytes = new AtomicLong(0);
-
     }
 
     private void printAndNewWindow(){
@@ -108,13 +130,14 @@ public class Stat {
             "win_total_msg:%s " +
             "win_msg/s:%s " +
             "win_total_latency(ms):%s";
-    public void printWindows(){
+    public void printWindows(){;
+        long ellapsed = System.currentTimeMillis() - windowStart;
         log.info(String.format(winFormat,
                 windowMaxLatency,
                 windowBytes.longValue(),
-                windowBytes.longValue()/(windowTotalLatency.longValue()/1000.0),
+                windowBytes.longValue()/(ellapsed/1000.0),
                 windowCount.intValue(),
-                windowCount.intValue()/(windowTotalLatency.longValue()/1000.0),
+                windowCount.intValue()/(ellapsed/1000.0),
                 windowTotalLatency));
     }
 
@@ -127,14 +150,15 @@ public class Stat {
             "total_latency(ms):%s";
     public synchronized void printTotal(){
         long stamp=stampedLock.writeLock();
+        long ellapsed = System.currentTimeMillis() - startTime;
         try {
             //windowCount:%s latency(ms):%s maxLatency(ms):%s byte/s:%s msg/s:%s
             log.info(String.format(sFormat,
                     maxLatency.longValue(),
                     bytes.longValue(),
-                    bytes.longValue()/(totalLatency.longValue()/1000.0),
+                    bytes.longValue()/(ellapsed/1000.0),
                     msg.intValue(),
-                    msg.intValue()/(totalLatency.longValue()/1000.0),
+                    msg.intValue()/(ellapsed/1000.0),
                     totalLatency));
         }finally {
            stampedLock.unlockWrite(stamp);

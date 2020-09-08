@@ -9,10 +9,12 @@ import cn.com.sherhom.reno.kafka.common.record.Stat;
 import cn.com.sherhom.reno.kafka.producer.runner.ProducerThread;
 import cn.com.sherhom.reno.kafka.common.service.KfkOperate;
 import cn.com.sherhom.reno.kafka.common.utils.KfkConf;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class KafkaProducerFairyLand {
     public static final String topicFormat =
             "RENO_TEST_TOPIC_PARTITION_%s_%s";
@@ -23,9 +25,9 @@ public class KafkaProducerFairyLand {
                          int partitionNum,
                          int producerNum,
                          int consumerNum,
-                         int kbPerMsg,
-                         int kbPerInput,//kb/s
-                         int kbPerOutput) {
+                         int bytePerMsg,
+                         int bytePerInput,//b/s
+                         double bytePerOutput) {
         List<String> topics = new ArrayList<>();
         List<ProducerThread> proThreads = new ArrayList<>();
         List conThreads = new ArrayList<>();
@@ -39,19 +41,26 @@ public class KafkaProducerFairyLand {
         }
         //2.create threads
 //        ProducerRunnerArgs proArgs;
-        Stat stat=new Stat(0,0,ProConf.reportInterval());
+        Stat stat=new Stat(0,0,ProConf.reportInterval(),producerNum);
+        int numOfMsg=ProConf.allKbSize()*1024/bytePerMsg;
+        int throughput=bytePerInput/bytePerMsg;
+
+        int singleBatchSize=numOfMsg/producerNum;
+        int singleThroughput=throughput/producerNum;
         topics.forEach((t)->{
             for (int i = 0; i < producerNum; i++) {
                 ProducerRunnerArgs proArgs = new ProducerRunnerArgs();
                 proArgs.setTopicName(t);
-                proArgs.setRecordSize(kbPerMsg);
-                proArgs.setNum(ProConf.allKbSize()/kbPerMsg);
-                proArgs.setThroughput(kbPerInput/kbPerMsg);
+                proArgs.setRecordSize(bytePerMsg);
+                proArgs.setNum(singleBatchSize);
+                proArgs.setThroughput(singleThroughput);
                 proArgs.setStat(stat);
                 proThreads.add(new ProducerThread(proArgs));
             }
         }
        );
+        log.info("Expect:  total_byte:{},bytePerMsg:{},byte/s:{},total_msg:{}, msg/s:{}",
+                ProConf.allKbSize()*1024,bytePerMsg,bytePerInput,numOfMsg,throughput);
         for (int i = 0; i < consumerNum; i++) {
             //todo
         }
@@ -64,6 +73,8 @@ public class KafkaProducerFairyLand {
             }
         });
         stat.printTotal();
+        if(stat.isFailed())
+            log.error("Case failed!");
     }
 
     public void prepareTopic(String topicName, int partitionNum) {

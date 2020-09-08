@@ -22,11 +22,13 @@ public class ProducerCallback implements Callback {
     }
     @Override
     public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-        long latency=System.currentTimeMillis()-this.start;
-        stat.record(this.index,recordMetadata.serializedValueSize(),1,latency);
         if(e!=null){
             LogUtil.printStackTrace(e);
             stat.setFailed();
+        }
+        else{
+            long latency=System.currentTimeMillis()-this.start;
+            stat.record(this.index,recordMetadata.serializedValueSize(),1,latency);
         }
 
     }

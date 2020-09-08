@@ -11,7 +11,7 @@ public class ProducerTest {
     @Test
     public void produTest(){
         new KafkaProducerFairyLand().entrance(
-                1,3,1,0,10,10,0
+                1,3,1,0,1*1024,160*1024,0
         );
     }
 }

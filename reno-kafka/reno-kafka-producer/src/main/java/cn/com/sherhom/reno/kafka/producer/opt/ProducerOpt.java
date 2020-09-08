@@ -18,6 +18,7 @@ public class ProducerOpt {
         long startMs = System.currentTimeMillis();
 
         ThroughputThrottler throttler = new ThroughputThrottler(throughput, startMs);
+        stat.start();
         for(int i=0;i<num;i++){
             if(stat.isFailed()){
                 break;
@@ -29,6 +30,7 @@ public class ProducerOpt {
                 throttler.throttle();
             }
         }
+        producer.close();
         return !stat.isFailed();
     }
 }
