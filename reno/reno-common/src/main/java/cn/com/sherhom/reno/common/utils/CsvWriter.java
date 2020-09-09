@@ -46,6 +46,8 @@ public class CsvWriter {
     public void writeHeader(){
         try {
             writeText.write(csvLine.getHeader());
+            writeText.newLine();
+            writeText.flush();
         } catch (IOException e) {
             LogUtil.printStackTrace(e);
             throw new RenoException(e);
@@ -57,10 +59,22 @@ public class CsvWriter {
             if(org.apache.commons.lang3.StringUtils.isNotBlank(line)){
                 writeText.write(line);
                 writeText.newLine();
+                writeText.flush();
             }
         } catch (IOException e) {
             LogUtil.printStackTrace(e);
             throw new RenoException(e);
         }
+    }
+    public void flush(){
+        try {
+            writeText.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Boolean isOpened() {
+        return opened;
     }
 }

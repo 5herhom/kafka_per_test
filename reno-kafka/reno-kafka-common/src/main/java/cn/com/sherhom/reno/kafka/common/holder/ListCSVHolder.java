@@ -17,5 +17,21 @@ public class ListCSVHolder {
             new Pair<>("msg_per_sec", "countPerSec"),
             new Pair<>("total_latency", "totalLatency"),
             new Pair<>("max_latency", "maxLatency")
-    ).collect(Collectors.toList())," ");
+    ).collect(Collectors.toList()),"\t");
+
+
+    public static final ListCSVLine resultCsvLine=new ListCSVLine(Stream.of(
+            new Pair<>("topicNum", "topicNum"),
+            new Pair<>("partitionNum", "partitionNum"),
+            new Pair<>("producerNum(per topic)", "producerNum"),
+            new Pair<>("consumerNum(per topic)", "consumerNum"),
+            new Pair<>("bytePerMsg", "bytePerMsg"),
+            new Pair<>("expectInput(byte/sec)", "bytePerSecInput"),
+            new Pair<>("expectOutput(byte/sec)", "bytePerSecOutput"),
+            new Pair<>("actualInput(byte/sec)", "actualInput"),
+            new Pair<>("inputDiff(byte/sec)", "inputDiff"),
+            new Pair<>("actualOutput(byte/sec)", "actualOutput"),
+            new Pair<>("outputDiff(byte/sec)", "outputDiff"),
+            new Pair<>("success", "success")
+    ).collect(Collectors.toList()),"\t");
 }

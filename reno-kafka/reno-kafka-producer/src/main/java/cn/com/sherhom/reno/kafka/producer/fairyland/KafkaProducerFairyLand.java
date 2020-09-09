@@ -1,7 +1,10 @@
 package cn.com.sherhom.reno.kafka.producer.fairyland;
 
 import cn.com.sherhom.reno.boot.annonation.ToExplore;
-import cn.com.sherhom.reno.common.utils.Asset;
+import cn.com.sherhom.reno.common.exception.RenoException;
+import cn.com.sherhom.reno.common.utils.*;
+import cn.com.sherhom.reno.kafka.common.holder.ListCSVHolder;
+import cn.com.sherhom.reno.kafka.common.record.ResultMetric;
 import cn.com.sherhom.reno.kafka.producer.config.ProConf;
 import cn.com.sherhom.reno.kafka.producer.entity.ProducerRunnerArgs;
 import cn.com.sherhom.reno.kafka.common.entity.TopicSimpleInfo;
@@ -12,6 +15,7 @@ import cn.com.sherhom.reno.kafka.common.utils.KfkConf;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -20,14 +24,17 @@ public class KafkaProducerFairyLand {
             "RENO_TEST_TOPIC_PARTITION_%s_%s";
     public static final String zkServer = KfkConf.zkIp();
 
+    private final String resultPath = ProConf.reportPath();
+    private final String fileName = "reno_kfk_producer_result_" + DateUtil.date2String(new Date()) + ".csv";
+
     @ToExplore
     public void entrance(int topicNum,
                          int partitionNum,
                          int producerNum,
                          int consumerNum,
                          int bytePerMsg,
-                         int bytePerInput,//b/s
-                         double bytePerOutput) {
+                         int bytePerSecInput,//b/s
+                         int bytePerSecOutput) {
         List<String> topics = new ArrayList<>();
         List<ProducerThread> proThreads = new ArrayList<>();
         List conThreads = new ArrayList<>();
@@ -41,40 +48,75 @@ public class KafkaProducerFairyLand {
         }
         //2.create threads
 //        ProducerRunnerArgs proArgs;
-        Stat stat=new Stat(0,0,ProConf.reportInterval(),producerNum);
-        int numOfMsg=ProConf.allKbSize()*1024/bytePerMsg;
-        int throughput=bytePerInput/bytePerMsg;
+        Stat stat = new Stat(0, 0, ProConf.reportInterval(), producerNum, ProConf.isReportToFile(), ProConf.reportPath());
+        try {
+            int numOfMsg = ProConf.allKbSize() * 1024 / bytePerMsg;
+            int throughput = bytePerSecInput / bytePerMsg;
 
-        int singleBatchSize=numOfMsg/producerNum;
-        int singleThroughput=throughput/producerNum;
-        topics.forEach((t)->{
-            for (int i = 0; i < producerNum; i++) {
-                ProducerRunnerArgs proArgs = new ProducerRunnerArgs();
-                proArgs.setTopicName(t);
-                proArgs.setRecordSize(bytePerMsg);
-                proArgs.setNum(singleBatchSize);
-                proArgs.setThroughput(singleThroughput);
-                proArgs.setStat(stat);
-                proThreads.add(new ProducerThread(proArgs));
+            int singleBatchSize = numOfMsg / producerNum;
+            int singleThroughput = throughput / producerNum;
+            topics.forEach((t) -> {
+                        for (int i = 0; i < producerNum; i++) {
+                            ProducerRunnerArgs proArgs = new ProducerRunnerArgs();
+                            proArgs.setTopicName(t);
+                            proArgs.setRecordSize(bytePerMsg);
+                            proArgs.setNum(singleBatchSize);
+                            proArgs.setThroughput(singleThroughput);
+                            proArgs.setStat(stat);
+                            proThreads.add(new ProducerThread(proArgs));
+                        }
+                    }
+            );
+            log.info("Expect:  total_byte:{},bytePerMsg:{},byte/s:{},total_msg:{}, msg/s:{}",
+                    ProConf.allKbSize() * 1024, bytePerMsg, bytePerSecInput, numOfMsg, throughput);
+            for (int i = 0; i < consumerNum; i++) {
+                //todo
             }
-        }
-       );
-        log.info("Expect:  total_byte:{},bytePerMsg:{},byte/s:{},total_msg:{}, msg/s:{}",
-                ProConf.allKbSize()*1024,bytePerMsg,bytePerInput,numOfMsg,throughput);
-        for (int i = 0; i < consumerNum; i++) {
-            //todo
-        }
-        proThreads.forEach(e->e.start());
-        proThreads.forEach(e-> {
-            try {
-                e.join();
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
+            proThreads.forEach(e -> e.start());
+            stat.writeHeaderToFile();
+            proThreads.forEach(e -> {
+                try {
+                    e.join();
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            });
+            stat.stop();
+            stat.printTotal();
+            ResultMetric resultMetric = new ResultMetric();
+            resultMetric.setTopicNum(topicNum);
+            resultMetric.setPartitionNum(partitionNum);
+            resultMetric.setProducerNum(producerNum);
+            resultMetric.setConsumerNum(consumerNum);
+            resultMetric.setBytePerMsg(bytePerMsg);
+            resultMetric.setBytePerSecInput(bytePerSecInput);
+            resultMetric.setBytePerSecOutput(bytePerSecOutput);
+            resultMetric.setActualInput(stat.getBytePerSec());
+            resultMetric.setInputDiff(bytePerSecInput - stat.getBytePerSec());
+            resultMetric.setActualOutput(0);
+            resultMetric.setOutputDiff(0);
+            resultMetric.setSuccess(!stat.isFailed());
+            if (stat.isFailed())
+                log.error("Case failed!");
+            CsvWriter resultWriter = new CsvWriter(FileUtil.getPathAndFile(ProConf.reportPath(), fileName), ListCSVHolder.resultCsvLine);
+            try{
+                resultWriter.open();
+                resultWriter.writeHeader();
+                resultWriter.writeLine(resultMetric);
+            } catch (Exception e) {
+                LogUtil.printStackTrace(e);
+                resultWriter.close();
             }
-        });
-        stat.printTotal();
-        if(stat.isFailed())
-            log.error("Case failed!");
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RenoException(e);
+        } finally {
+            if (stat != null)
+                stat.closeFile();
+        }
+
     }
 
     public void prepareTopic(String topicName, int partitionNum) {
@@ -94,6 +136,5 @@ public class KafkaProducerFairyLand {
                             topicSimpleInfo.getPartNum(), partitionNum, topicName));
         }
     }
-
 
 }

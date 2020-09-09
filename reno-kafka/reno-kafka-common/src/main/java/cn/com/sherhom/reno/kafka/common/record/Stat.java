@@ -1,10 +1,15 @@
 package cn.com.sherhom.reno.kafka.common.record;
 
+import cn.com.sherhom.reno.common.utils.CsvWriter;
+import cn.com.sherhom.reno.common.utils.DateUtil;
+import cn.com.sherhom.reno.common.utils.FileUtil;
+import cn.com.sherhom.reno.kafka.common.holder.ListCSVHolder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,12 +26,14 @@ public class Stat {
     private final StampedLock stampedLock = new StampedLock();
     private volatile boolean failed;
     private long startTime;
+    private long endTime;
     private volatile boolean started=false;
     private AtomicLong totalBytes;
     private AtomicLong totalLatency;
     private AtomicInteger msg;
     private AtomicLong maxLatency;
 
+    private boolean isWriteToFile;
     private long windowStart;
     private AtomicInteger windowCount;
     private long windowMaxLatency;
@@ -34,8 +41,10 @@ public class Stat {
     private AtomicLong windowBytes;
     private long reportingInterval;
     private ConcurrentLinkedDeque<Integer> indexList;
-
+    private CsvWriter csvWriter;
     private CountDownLatch countDownLatch;
+
+    private String filePath;
     public Stat(long totalBytes, int msg, long reportingInterval, int threadNum) {
         this.startTime =System.currentTimeMillis();
         this.failed =false;
@@ -47,7 +56,25 @@ public class Stat {
         this.maxLatency =new AtomicLong(0);
         this.indexList=new ConcurrentLinkedDeque();
         this.newWindows();
+        this.isWriteToFile = false;
         countDownLatch=new CountDownLatch(threadNum);
+    }
+    public Stat(long totalBytes, int msg, long reportingInterval, int threadNum,boolean isWriteToFile,String path) {
+        this.startTime =System.currentTimeMillis();
+        this.failed =false;
+        this.totalBytes =new AtomicLong(totalBytes);
+        this.reportingInterval=reportingInterval;
+        this.totalLatency =new AtomicLong(0);
+        this.msg =new AtomicInteger(msg);
+
+        this.maxLatency =new AtomicLong(0);
+        this.indexList=new ConcurrentLinkedDeque();
+        this.newWindows();
+        this.isWriteToFile = isWriteToFile;
+        countDownLatch=new CountDownLatch(threadNum);
+        String fileName="reno_kfk_producer"+ DateUtil.date2String(new Date()) +".csv";
+        this.filePath= FileUtil.getPathAndFile(path,fileName);
+        this.csvWriter=new CsvWriter(this.filePath, ListCSVHolder.metricCsvLine);
     }
     public void start(){
         countDownLatch.countDown();
@@ -66,12 +93,21 @@ public class Stat {
         }
         log.info("Thread:{} started stat",Thread.currentThread().getName());
     }
+    public void stop(){
+        this.started=false;
+        this.endTime=System.currentTimeMillis();
+    }
     public boolean isFailed() {
         return failed;
     }
     public void setFailed() {
         this.failed = true;
     }
+    public int getBytePerSec(){
+        long ellapsed = getElapse();
+        return (int)(this.totalBytes.longValue()/(ellapsed/1000));
+    }
+
     public void record(int index,long bytes,int msg,long latency){
         long stamp=stampedLock.readLock();
         try{
@@ -120,12 +156,16 @@ public class Stat {
     private void printAndNewWindow(){
         long stamp=stampedLock.writeLock();
         try {
+            if(this.isWriteToFile){
+                writeWindowsToFile();
+            }
             printWindows();
             newWindows();
         } finally {
             stampedLock.unlockWrite(stamp);
         }
     }
+
     private static final String winFormat=
             "win_max_latency(ms):%s " +
             "win_total_byte:%s " +
@@ -133,11 +173,13 @@ public class Stat {
             "win_total_msg:%s " +
             "win_msg/s:%s " +
             "win_total_latency(ms):%s";
-    public void printWindows(){;
-        long ellapsed = System.currentTimeMillis() - windowStart;
+    private void printWindows(){;
         log.info(windowsMgs());
     }
-    public String windowsMgs(){
+    private void writeWindowsToFile(){
+        writeToFile(windowsMetric());
+    }
+    private String windowsMgs(){
         Metric metric = windowsMetric();
         return String.format(winFormat,
                 metric.getMaxLatency(),
@@ -147,13 +189,13 @@ public class Stat {
                 metric.getCountPerSec(),
                 metric.getTotalLatency());
     }
-    public Metric windowsMetric(){
-        long ellapsed = System.currentTimeMillis() - windowStart;
+    private Metric windowsMetric(){
+        long ellapsed = getElapse();
         return new Metric(windowMaxLatency,
                 windowBytes.longValue(),
-                windowBytes.longValue()/(ellapsed/1000.0),
+                ellapsed>0?windowBytes.longValue()/(ellapsed/1000.0):0,
                 windowCount.intValue(),
-                windowCount.intValue()/(ellapsed/1000.0),
+                ellapsed>0?windowCount.intValue()/(ellapsed/1000.0):0,
                 windowTotalLatency.longValue());
     }
     @Data
@@ -176,10 +218,19 @@ public class Stat {
             "total_latency(ms):%s";
     public void printTotal(){
        log.info(totalMsg());
+       if(canWrite())
+        writeTotalToFile();
+    }
+    public void writeTotalToFile(){
+        writeToFile(totalMetric());
+    }
+    public void closeFile(){
+        if(csvWriter.isOpened())
+            csvWriter.close();
     }
     public String totalMsg(){
         long stamp=stampedLock.writeLock();
-        long ellapsed = System.currentTimeMillis() - startTime;
+        long ellapsed = getElapse();
         String res;
         try {
             //windowCount:%s latency(ms):%s maxLatency(ms):%s byte/s:%s msg/s:%s
@@ -212,5 +263,23 @@ public class Stat {
             stampedLock.unlockWrite(stamp);
         }
         return res;
+    }
+    private void writeToFile(Metric metric){
+        if(!csvWriter.isOpened())
+            csvWriter.open();
+        csvWriter.writeLine(metric);
+    }
+    private boolean canWrite(){
+        return csvWriter!=null&&this.isWriteToFile;
+    }
+    public void writeHeaderToFile(){
+        if(canWrite()){
+            if(!csvWriter.isOpened())
+                csvWriter.open();
+            csvWriter.writeHeader();
+        }
+    }
+    private long getElapse(){
+        return this.started?System.currentTimeMillis()-this.startTime:this.endTime-this.startTime;
     }
 }

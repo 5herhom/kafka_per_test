@@ -14,8 +14,14 @@ import java.io.IOException;
 public class FileUtil {
     public static File openAndCreateFile(String path){
         File file=new File(path);
+
         if(file.isDirectory())
             return null;
+
+        File parent=file.getParentFile();
+        if(!parent.exists()){
+            parent.mkdirs();
+        }
         if(!file.exists()) {
             try {
                 file.createNewFile();
@@ -25,5 +31,9 @@ public class FileUtil {
             }
         }
         return file;
+    }
+    public static String getPathAndFile(String path,String file){
+        return path==null?null:
+                path.endsWith("/")||path.endsWith("\\")?path+file:path+"/"+file;
     }
 }
