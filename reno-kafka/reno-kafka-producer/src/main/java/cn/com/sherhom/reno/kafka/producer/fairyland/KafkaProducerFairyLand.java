@@ -24,7 +24,7 @@ public class KafkaProducerFairyLand {
             "RENO_TEST_TOPIC_PARTITION_%s_%s";
     public static final String zkServer = KfkConf.zkIp();
 
-    private final String resultPath = ProConf.reportPath();
+    private final String resultPath = ProConf.reportPath()+"/"+DateUtil.date2String(new Date());
     private final String fileName = "reno_kfk_producer_result_" + DateUtil.date2String(new Date()) + ".csv";
 
     @ToExplore
@@ -48,12 +48,12 @@ public class KafkaProducerFairyLand {
         }
         //2.create threads
 //        ProducerRunnerArgs proArgs;
-        Stat stat = new Stat(0, 0, ProConf.reportInterval(), producerNum, ProConf.isReportToFile(), ProConf.reportPath());
+        Stat stat = new Stat(0, 0, ProConf.reportInterval(), producerNum, ProConf.isReportToFile(), resultPath);
         try {
-            int numOfMsg = ProConf.allKbSize() * 1024 / bytePerMsg;
+            long numOfMsg = ProConf.allKbSize() * 1024 / bytePerMsg;
             int throughput = bytePerSecInput / bytePerMsg;
 
-            int singleBatchSize = numOfMsg / producerNum;
+            long singleBatchSize = numOfMsg / producerNum;
             int singleThroughput = throughput / producerNum;
             topics.forEach((t) -> {
                         for (int i = 0; i < producerNum; i++) {
@@ -92,16 +92,20 @@ public class KafkaProducerFairyLand {
             resultMetric.setBytePerSecInput(bytePerSecInput);
             resultMetric.setBytePerSecOutput(bytePerSecOutput);
             resultMetric.setActualInput(stat.getBytePerSec());
-            resultMetric.setInputDiff(bytePerSecInput - stat.getBytePerSec());
+            resultMetric.setInputDiff(stat.getBytePerSec()-bytePerSecInput );
+            resultMetric.setInputDiffPercent((stat.getBytePerSec()-bytePerSecInput)/(double)bytePerSecInput );
             resultMetric.setActualOutput(0);
             resultMetric.setOutputDiff(0);
+            resultMetric.setOutputDiffPercent(0.0);
             resultMetric.setSuccess(!stat.isFailed());
+            resultMetric.setDetailLogPath(stat.getFilePath());
             if (stat.isFailed())
                 log.error("Case failed!");
-            CsvWriter resultWriter = new CsvWriter(FileUtil.getPathAndFile(ProConf.reportPath(), fileName), ListCSVHolder.resultCsvLine);
+            CsvWriter resultWriter = new CsvWriter(FileUtil.getPathAndFile(resultPath, fileName), ListCSVHolder.resultCsvLine);
             try{
                 resultWriter.open();
-                resultWriter.writeHeader();
+                if(resultWriter.isShouldCreate())
+                    resultWriter.writeHeader();
                 resultWriter.writeLine(resultMetric);
             } catch (Exception e) {
                 LogUtil.printStackTrace(e);

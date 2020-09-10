@@ -72,7 +72,7 @@ public class Stat {
         this.newWindows();
         this.isWriteToFile = isWriteToFile;
         countDownLatch=new CountDownLatch(threadNum);
-        String fileName="reno_kfk_producer"+ DateUtil.date2String(new Date()) +".csv";
+        String fileName="reno_kfk_producer_"+ DateUtil.date2String(new Date()) +".csv";
         this.filePath= FileUtil.getPathAndFile(path,fileName);
         this.csvWriter=new CsvWriter(this.filePath, ListCSVHolder.metricCsvLine);
     }
@@ -105,7 +105,7 @@ public class Stat {
     }
     public int getBytePerSec(){
         long ellapsed = getElapse();
-        return (int)(this.totalBytes.longValue()/(ellapsed/1000));
+        return ellapsed==0?0:(int)(this.totalBytes.longValue()/(ellapsed/1000.0));
     }
 
     public void record(int index,long bytes,int msg,long latency){
@@ -281,5 +281,9 @@ public class Stat {
     }
     private long getElapse(){
         return this.started?System.currentTimeMillis()-this.startTime:this.endTime-this.startTime;
+    }
+
+    public String getFilePath() {
+        return filePath;
     }
 }

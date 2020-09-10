@@ -16,16 +16,19 @@ public class CsvWriter {
     File file;
     String path;
     Boolean opened=false;
+    Boolean shouldCreate=false;
     CSVLine csvLine;
     public CsvWriter(String path,CSVLine csvLine){
         this.path=path;
         this.csvLine=csvLine;
     }
     public void open(){
+        File tmpFile=new File(path);
+        shouldCreate=!tmpFile.exists();
         file=FileUtil.openAndCreateFile(path);
         Asset.notNull(file,"The file is opened failed");
         try {
-            writeText=new BufferedWriter(new FileWriter(file));
+            writeText=new BufferedWriter(new FileWriter(file,true));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RenoException(e);
@@ -76,5 +79,8 @@ public class CsvWriter {
 
     public Boolean isOpened() {
         return opened;
+    }
+    public Boolean isShouldCreate() {
+        return shouldCreate;
     }
 }

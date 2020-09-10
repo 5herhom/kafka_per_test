@@ -19,6 +19,10 @@ public class ConfUtil {
     public static int getInt(String key,Object defaultValue){
         return Integer.valueOf(get(key,defaultValue.toString()));
     }
+
+    public static long getLong(String key,Object defaultValue){
+        return Long.valueOf(get(key,defaultValue.toString()));
+    }
     public static boolean getBoolean(String key,Object defaultValue){
         return Boolean.valueOf(get(key,defaultValue.toString()));
     }

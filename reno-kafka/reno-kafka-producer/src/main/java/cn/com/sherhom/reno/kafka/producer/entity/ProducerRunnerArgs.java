@@ -11,7 +11,7 @@ import lombok.Data;
 public class ProducerRunnerArgs {
     private String topicName;
     private int recordSize;
-    private int num;
+    private long num;
     //msg/sec
     private int throughput;
     private Stat stat;

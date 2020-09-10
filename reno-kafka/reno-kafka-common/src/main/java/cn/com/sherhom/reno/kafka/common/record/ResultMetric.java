@@ -21,7 +21,10 @@ public class ResultMetric {
     Integer bytePerSecOutput;
     Integer actualInput;
     Integer inputDiff;
+    Double inputDiffPercent;
     Integer actualOutput;
     Integer outputDiff;
+    Double outputDiffPercent;
     Boolean success;
+    String detailLogPath;
 }
