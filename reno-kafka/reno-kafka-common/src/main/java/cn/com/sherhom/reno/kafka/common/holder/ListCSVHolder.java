@@ -34,6 +34,7 @@ public class ListCSVHolder {
             new Pair<>("actualOutput(byte/sec)", "actualOutput"),
             new Pair<>("outputDiff(byte/sec)", "outputDiff"),
             new Pair<>("outputDiffPercent(%)", "outputDiffPercent"),
+            new Pair<>("executeTime(s)", "executeTime"),
             new Pair<>("success", "success"),
             new Pair<>("detailLogPath", "detailLogPath")
     ).collect(Collectors.toList()),"\t");

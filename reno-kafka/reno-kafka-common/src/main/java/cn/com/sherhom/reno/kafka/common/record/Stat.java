@@ -190,7 +190,7 @@ public class Stat {
                 metric.getTotalLatency());
     }
     private Metric windowsMetric(){
-        long ellapsed = getElapse();
+        long ellapsed = getWindowsElapse();
         return new Metric(windowMaxLatency,
                 windowBytes.longValue(),
                 ellapsed>0?windowBytes.longValue()/(ellapsed/1000.0):0,
@@ -279,10 +279,12 @@ public class Stat {
             csvWriter.writeHeader();
         }
     }
-    private long getElapse(){
+    public long getElapse(){
         return this.started?System.currentTimeMillis()-this.startTime:this.endTime-this.startTime;
     }
-
+    private long getWindowsElapse(){
+        return System.currentTimeMillis()-this.startTime;
+    }
     public String getFilePath() {
         return filePath;
     }

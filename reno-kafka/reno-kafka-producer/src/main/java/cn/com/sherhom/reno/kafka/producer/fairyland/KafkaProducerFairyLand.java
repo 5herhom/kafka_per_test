@@ -97,6 +97,7 @@ public class KafkaProducerFairyLand {
             resultMetric.setActualOutput(0);
             resultMetric.setOutputDiff(0);
             resultMetric.setOutputDiffPercent(0.0);
+            resultMetric.setExecuteTime(stat.getElapse());
             resultMetric.setSuccess(!stat.isFailed());
             resultMetric.setDetailLogPath(stat.getFilePath());
             if (stat.isFailed())

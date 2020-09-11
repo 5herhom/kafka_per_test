@@ -25,6 +25,7 @@ public class ResultMetric {
     Integer actualOutput;
     Integer outputDiff;
     Double outputDiffPercent;
+    Long executeTime;
     Boolean success;
     String detailLogPath;
 }
