@@ -19,6 +19,7 @@ public class DateUtil {
         if (dateFormat == null) {
             synchronized (formatPool) {
                 if (dateFormat == null) {
+                    dateFormat = formatPool.get(str);
                     dateFormat = new SimpleDateFormat(str);
                 }
             }
@@ -29,6 +30,6 @@ public class DateUtil {
         return getSimpleDateFormat(formatStr).format(d);
     }
     public static String date2String(Date d){
-        return date2String(d,"yyyy-MM-dd-HH-mm-ss");
+        return date2String(d,"yyyy-MM-dd_HH-mm-ss");
     }
 }

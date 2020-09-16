@@ -58,5 +58,17 @@ public class KfkOperate {
     public static boolean createTopic(TopicSimpleInfo simpleInfo){
         return createTopic(simpleInfo,new Properties());
     }
-
+    public static boolean alterConfig(TopicSimpleInfo simpleInfo,Properties config){
+        ZkClient zkClient=ZkUtils.createZkClient(simpleInfo.getZkServers(),10*1000,8*1000);
+        ZkUtils zkUtils=new ZkUtils(zkClient,new ZkConnection(simpleInfo.getZkServers()),false);
+        KfkOperate4scala.alterConfig(simpleInfo.getTopicName(),zkUtils,config);
+        zkUtils.close();
+        return true;
+    }
+    public static Properties descConfig(TopicSimpleInfo simpleInfo){
+        ZkClient zkClient=ZkUtils.createZkClient(simpleInfo.getZkServers(),10*1000,8*1000);
+        ZkUtils zkUtils=new ZkUtils(zkClient,new ZkConnection(simpleInfo.getZkServers()),false);
+        Properties config=KfkOperate4scala.descConfig(simpleInfo.getTopicName(),zkUtils);
+        return config;
+    }
 }

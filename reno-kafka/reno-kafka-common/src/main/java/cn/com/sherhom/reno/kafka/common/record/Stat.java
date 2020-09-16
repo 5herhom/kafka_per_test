@@ -30,12 +30,12 @@ public class Stat {
     private volatile boolean started=false;
     private AtomicLong totalBytes;
     private AtomicLong totalLatency;
-    private AtomicInteger msg;
+    private AtomicLong msg;
     private AtomicLong maxLatency;
 
     private boolean isWriteToFile;
     private long windowStart;
-    private AtomicInteger windowCount;
+    private AtomicLong windowCount;
     private long windowMaxLatency;
     private AtomicLong windowTotalLatency;
     private AtomicLong windowBytes;
@@ -45,13 +45,13 @@ public class Stat {
     private CountDownLatch countDownLatch;
 
     private String filePath;
-    public Stat(long totalBytes, int msg, long reportingInterval, int threadNum) {
+    public Stat(long totalBytes, long msg, long reportingInterval, int threadNum) {
         this.startTime =System.currentTimeMillis();
         this.failed =false;
         this.totalBytes =new AtomicLong(totalBytes);
         this.reportingInterval=reportingInterval;
         this.totalLatency =new AtomicLong(0);
-        this.msg =new AtomicInteger(msg);
+        this.msg =new AtomicLong(msg);
 
         this.maxLatency =new AtomicLong(0);
         this.indexList=new ConcurrentLinkedDeque();
@@ -59,13 +59,13 @@ public class Stat {
         this.isWriteToFile = false;
         countDownLatch=new CountDownLatch(threadNum);
     }
-    public Stat(long totalBytes, int msg, long reportingInterval, int threadNum,boolean isWriteToFile,String path) {
+    public Stat(long totalBytes, long msg, long reportingInterval, int threadNum,boolean isWriteToFile,String path) {
         this.startTime =System.currentTimeMillis();
         this.failed =false;
         this.totalBytes =new AtomicLong(totalBytes);
         this.reportingInterval=reportingInterval;
         this.totalLatency =new AtomicLong(0);
-        this.msg =new AtomicInteger(msg);
+        this.msg =new AtomicLong(msg);
 
         this.maxLatency =new AtomicLong(0);
         this.indexList=new ConcurrentLinkedDeque();
@@ -103,9 +103,9 @@ public class Stat {
     public void setFailed() {
         this.failed = true;
     }
-    public int getBytePerSec(){
+    public long getBytePerSec(){
         long ellapsed = getElapse();
-        return ellapsed==0?0:(int)(this.totalBytes.longValue()/(ellapsed/1000.0));
+        return ellapsed==0?0:(long)(this.totalBytes.longValue()/(ellapsed/1000.0));
     }
 
     public void record(int index,long bytes,int msg,long latency){
@@ -125,7 +125,13 @@ public class Stat {
             stampedLock.unlockRead(stamp);
         }
         if(this.reportingInterval>0&&System.currentTimeMillis()-this.windowStart>this.reportingInterval){
-            printAndNewWindow();
+            stamp=stampedLock.writeLock();
+            try {
+                if(this.reportingInterval>0&&System.currentTimeMillis()-this.windowStart>this.reportingInterval)
+                    printAndNewWindow();
+            } finally {
+                stampedLock.unlockWrite(stamp);
+            }
         }
     }
 
@@ -137,33 +143,28 @@ public class Stat {
         return totalLatency;
     }
 
-    public AtomicInteger getMsg() {
+    public AtomicLong getMsg() {
         return msg;
     }
 
-    public AtomicInteger getWindowCount() {
+    public AtomicLong getWindowCount() {
         return windowCount;
     }
 
     public void newWindows(){
         this.windowStart = System.currentTimeMillis();
-        this.windowCount = new AtomicInteger(0);
+        this.windowCount = new AtomicLong(0);
         this.windowMaxLatency = 0;
         this.windowTotalLatency =  new AtomicLong(0);
         this.windowBytes = new AtomicLong(0);
     }
 
     private void printAndNewWindow(){
-        long stamp=stampedLock.writeLock();
-        try {
-            if(this.isWriteToFile){
-                writeWindowsToFile();
-            }
-            printWindows();
-            newWindows();
-        } finally {
-            stampedLock.unlockWrite(stamp);
+        if(this.isWriteToFile){
+            writeWindowsToFile();
         }
+        printWindows();
+        newWindows();
     }
 
     private static final String winFormat=
@@ -193,9 +194,9 @@ public class Stat {
         long ellapsed = getWindowsElapse();
         return new Metric(windowMaxLatency,
                 windowBytes.longValue(),
-                ellapsed>0?windowBytes.longValue()/(ellapsed/1000.0):0,
+                (long)(ellapsed>0?windowBytes.longValue()/(ellapsed/1000.0):0),
                 windowCount.intValue(),
-                ellapsed>0?windowCount.intValue()/(ellapsed/1000.0):0,
+                (long)(ellapsed>0?windowCount.intValue()/(ellapsed/1000.0):0),
                 windowTotalLatency.longValue());
     }
     @Data
@@ -204,9 +205,9 @@ public class Stat {
     class Metric{
         long maxLatency;
         long totalBytes;
-        double bytePerSec;
+        long bytePerSec;
         long totalCount;
-        double countPerSec;
+        long countPerSec;
         long totalLatency;
     }
     private static final String sFormat=
@@ -255,9 +256,9 @@ public class Stat {
             res=new Metric(
                     maxLatency.longValue(),
                     totalBytes.longValue(),
-                    totalBytes.longValue()/(ellapsed/1000.0),
+                    (long)(totalBytes.longValue()/(ellapsed/1000.0)),
                     msg.intValue(),
-                    msg.intValue()/(ellapsed/1000.0),
+                    (long)(msg.intValue()/(ellapsed/1000.0)),
                     totalLatency.longValue());
         }finally {
             stampedLock.unlockWrite(stamp);
@@ -283,7 +284,7 @@ public class Stat {
         return this.started?System.currentTimeMillis()-this.startTime:this.endTime-this.startTime;
     }
     private long getWindowsElapse(){
-        return System.currentTimeMillis()-this.startTime;
+        return System.currentTimeMillis()-this.windowStart;
     }
     public String getFilePath() {
         return filePath;

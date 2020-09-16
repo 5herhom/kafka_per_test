@@ -13,6 +13,6 @@ public class ProducerRunnerArgs {
     private int recordSize;
     private long num;
     //msg/sec
-    private int throughput;
+    private long throughput;
     private Stat stat;
 }

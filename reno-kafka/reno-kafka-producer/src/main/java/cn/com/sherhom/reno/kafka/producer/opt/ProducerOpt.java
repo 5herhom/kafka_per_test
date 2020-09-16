@@ -13,7 +13,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
  * @date 2020/9/8 13:46
  */
 public class ProducerOpt {
-    public static boolean sendMsg(Producer producer, String topicName, int size, long num, int throughput, Stat stat){
+    public static boolean sendMsg(Producer producer, String topicName, int size, long num, long throughput, Stat stat){
         byte[] msg= MsgUtil.getBytes(size);
         long startMs = System.currentTimeMillis();
 
