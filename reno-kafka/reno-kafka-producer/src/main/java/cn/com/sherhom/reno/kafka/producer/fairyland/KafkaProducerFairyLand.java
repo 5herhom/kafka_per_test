@@ -54,8 +54,8 @@ public class KafkaProducerFairyLand {
             long numOfMsg = ProConf.allKbSize() * 1024 / bytePerMsg;
             long throughput = bytePerSecInput / bytePerMsg;
 
-            long singleBatchSize = numOfMsg / producerNum / topicNum;
-            long singleThroughput = throughput / producerNum / topicNum;
+            long singleBatchSize = numOfMsg / producerNum / topicNum +1;
+            long singleThroughput = throughput / producerNum / topicNum+1;
             topics.forEach((t) -> {
                         for (int i = 0; i < producerNum; i++) {
                             ProducerRunnerArgs proArgs = new ProducerRunnerArgs();
