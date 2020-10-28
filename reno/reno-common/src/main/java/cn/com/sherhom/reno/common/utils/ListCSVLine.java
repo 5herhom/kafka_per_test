@@ -1,8 +1,9 @@
-package cn.com.sherhom.reno.kafka.common.holder;
+package cn.com.sherhom.reno.common.utils;
 
 import cn.com.sherhom.reno.common.entity.Pair;
 import cn.com.sherhom.reno.common.utils.AbstractCSVLine;
 import cn.com.sherhom.reno.common.utils.CSVLine;
+import com.alibaba.fastjson.JSONObject;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -47,7 +48,15 @@ public class ListCSVLine extends AbstractCSVLine implements CSVLine {
         });
         return sb.length()>2?sb.substring(0,sb.length()-1):sb.toString();
     }
-
+    @Override
+    public String getLine(JSONObject o) {
+        StringBuilder sb = new StringBuilder();
+        mapper.forEach(pair -> {
+            Object value = o.getString(pair.getValue());
+            separateLink(sb, value);
+        });
+        return sb.length()>2?sb.substring(0,sb.length()-1):sb.toString();
+    }
     @Override
     public String getHeader() {
         StringBuilder sb=new StringBuilder();

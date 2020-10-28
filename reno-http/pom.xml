@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>reno</artifactId>
+        <groupId>cn.com.sherhom</groupId>
+        <version>0.0.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>reno-http</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>reno-http-common</module>
+        <module>reno-http-multi-thread</module>
+    </modules>
+    <properties>
+        <http.client.version>4.5.9</http.client.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <artifactId>reno-boot</artifactId>
+            <groupId>cn.com.sherhom</groupId>
+        </dependency>
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>cn.com.sherhom</groupId>
+                <artifactId>reno-http-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${http.client.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

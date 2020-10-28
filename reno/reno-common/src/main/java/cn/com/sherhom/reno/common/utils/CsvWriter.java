@@ -1,6 +1,7 @@
 package cn.com.sherhom.reno.common.utils;
 
 import cn.com.sherhom.reno.common.exception.RenoException;
+import com.alibaba.fastjson.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -58,7 +59,11 @@ public class CsvWriter {
     }
     public void writeLine(Object o){
         try {
-            String line = csvLine.getLine(o);
+            String line;
+            if(o instanceof JSONObject)
+                line=csvLine.getLine((JSONObject)o);
+            else
+                line = csvLine.getLine(o);
             if(org.apache.commons.lang3.StringUtils.isNotBlank(line)){
                 writeText.write(line);
                 writeText.newLine();
