@@ -18,7 +18,7 @@ public class DateUtil {
     public static DateFormat getSimpleDateFormat(String formatStr) {
         if(formatPool.get()==null)
             formatPool.set(new HashMap<>());
-        if (formatPool.get().containsKey(formatStr)) {
+        if (!formatPool.get().containsKey(formatStr)) {
             formatPool.get().put(formatStr,new SimpleDateFormat(formatStr));
         }
         return formatPool.get().get(formatStr);

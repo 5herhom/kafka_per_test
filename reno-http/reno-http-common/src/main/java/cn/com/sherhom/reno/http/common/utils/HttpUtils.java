@@ -4,6 +4,7 @@ import cn.com.sherhom.reno.common.utils.LogUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -23,6 +24,18 @@ import java.util.Map;
  * @date 2020/10/28 10:46
  */
 public class HttpUtils {
+    private static Object lock=new Object();
+    private static volatile CloseableHttpClient httpClient;
+    private static CloseableHttpClient getHttpClient(){
+        if(httpClient==null){
+            synchronized (lock){
+                if(httpClient==null){
+                    httpClient=HttpClients.createDefault();
+                }
+            }
+        }
+        return httpClient;
+    }
     public static String get(String url){
         return get(url,null);
     }
@@ -40,7 +53,8 @@ public class HttpUtils {
             if(param!=null)
                 param.forEach((k,v)->uriBuilder.setParameter(k,v));
 
-            httpClient=HttpClients.createDefault();
+            httpClient=getHttpClient();
+//            httpClient=HttpClients.createDefault();
             HttpGet httpPost=new HttpGet(uriBuilder.build());
             response=httpClient.execute(httpPost);
             return response;
@@ -49,7 +63,6 @@ public class HttpUtils {
             return null;
         }
         finally {
-            IOUtils.closeQuietly(httpClient);
         }
     }
     public static String postJson(String url, Object param,Map<String,String>header){
@@ -93,8 +106,11 @@ public class HttpUtils {
         CloseableHttpClient httpClient= null;
         CloseableHttpResponse response=null;
         try{
-            httpClient=HttpClients.createDefault();
+            httpClient=getHttpClient();
+//            httpClient=HttpClients.createDefault();
+
             HttpPost httpPost=new HttpPost(url);
+            httpPost.setProtocolVersion(HttpVersion.HTTP_1_0);
             httpPost.setEntity(new StringEntity(jsonStr,"utf-8"));
             httpPost.setHeader("Content-Type","application/json");
             if(headers!=null)
@@ -106,7 +122,8 @@ public class HttpUtils {
             return null;
         }
         finally {
-            IOUtils.closeQuietly(httpClient);
+//            IOUtils.closeQuietly(httpClient);
+//            IOUtils.closeQuietly(response);
         }
     }
 }

@@ -21,11 +21,17 @@ public class RenoHttpMultiThreadApplication {
     public static void main(String[] args) {
         List<CaseProvider> providers=new ArrayList<>();
         CaseProvider threadNumProvide=new ProviderBuilder<Integer>().fieldType(ProviderBuilder.ProviderType.LIST).cases(
-                Stream.of(1,2,5,10).collect(Collectors.toList())
+                Stream.of(100).collect(Collectors.toList())
         ).build();
+        providers.add(threadNumProvide);
+//        CaseProvider lastTimeMsProvide=new ProviderBuilder<Long>().fieldType(ProviderBuilder.ProviderType.LIST).cases(
+//                Stream.of(10000l,900000l).collect(Collectors.toList())
+//        ).build();
         CaseProvider lastTimeMsProvide=new ProviderBuilder<Long>().fieldType(ProviderBuilder.ProviderType.LIST).cases(
-                Stream.of(900000l).collect(Collectors.toList())
+                Stream.of(10000l).collect(Collectors.toList())
         ).build();
+        providers.add(lastTimeMsProvide);
+
         new RenoApplication().run(new HttpMultiThreadFairyLand(),providers);
     }
 }

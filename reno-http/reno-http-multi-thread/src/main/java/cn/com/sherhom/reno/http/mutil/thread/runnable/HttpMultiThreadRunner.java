@@ -16,8 +16,12 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class HttpMultiThreadRunner extends Thread {
     HttpMultiThreadArgs args;
-
+    public HttpMultiThreadRunner(HttpMultiThreadArgs args,int i) {
+        super("HttpMutilThread-"+i);
+        this.args = args;
+    }
     public HttpMultiThreadRunner(HttpMultiThreadArgs args) {
+        super("HttpMutilThread");
         this.args = args;
     }
 
@@ -38,6 +42,10 @@ public class HttpMultiThreadRunner extends Thread {
             sw.stop();
             log.debug(res);
             stat.recordMs(sw.getTime());
+            if(res==null)
+                stat.recordFail();
+            else
+                stat.recordSuccess();
         }
         stat.stop();
     }

@@ -17,6 +17,6 @@ public class HttpConfUtil {
         return ConfUtil.get(TARGET_HTTP_PARAM_KEY);
     }
     public static String reportPath(){
-        return ConfUtil.get(REPORT_PATH_KEY);
+        return ConfUtil.get(REPORT_PATH_KEY,"/data/reno/http/multiThread/report");
     }
 }

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +37,8 @@ public class Stat {
     Long avgMs;
     Long maxMs;
     Long minMs;
+    AtomicLong successNum=new AtomicLong();
+    AtomicLong failNum=new AtomicLong();
     List<PnMetric> PnList=new ArrayList<>();
     List<Long> finalCostTimeList=new ArrayList<>();
     public Stat(int threadNum, Long lastTimeMs) {
@@ -88,6 +91,12 @@ public class Stat {
     public void recordMs(Long ms){
         getLocalCostTimeList().add(ms);
     }
+    public void recordSuccess(){
+        successNum.getAndIncrement();
+    }
+    public void recordFail(){
+        failNum.getAndIncrement();
+    }
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -111,6 +120,8 @@ public class Stat {
     private final static List<Pair<String,String>> ResultMapper=Stream.of(
             new Pair<>("threadNum","threadNum"),
             new Pair<>("requestTotal","requestTotal"),
+            new Pair<>("successNum","successNum"),
+            new Pair<>("failNum","failNum"),
             new Pair<>("avgMs","avgMs"),
             new Pair<>("maxMs","maxMs"),
             new Pair<>("minMs","minMs")
@@ -129,6 +140,8 @@ public class Stat {
         JSONObject resultJson=new JSONObject();
         resultJson.put("threadNum",this.threadNum);
         resultJson.put("requestTotal",this.requestTotal);
+        resultJson.put("successNum",this.successNum.get());
+        resultJson.put("failNum",this.failNum.get());
         resultJson.put("avgMs",this.avgMs);
         resultJson.put("maxMs",this.maxMs);
         resultJson.put("minMs",this.minMs);

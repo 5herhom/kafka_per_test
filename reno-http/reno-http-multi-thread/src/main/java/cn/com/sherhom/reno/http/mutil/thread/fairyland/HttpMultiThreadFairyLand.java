@@ -30,7 +30,7 @@ public class HttpMultiThreadFairyLand {
         List<Thread> threadList=new ArrayList<>();
         HttpMultiThreadArgs args=new HttpMultiThreadArgs(lastTimeMs,stat);
         for (int i = 0; i < threadNum; i++) {
-            Thread thread=new HttpMultiThreadRunner(args);
+            Thread thread=new HttpMultiThreadRunner(args,i);
             threadList.add(thread);
             thread.start();
         }
