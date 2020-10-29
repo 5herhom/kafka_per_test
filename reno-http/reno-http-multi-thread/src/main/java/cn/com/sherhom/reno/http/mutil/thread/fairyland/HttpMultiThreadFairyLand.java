@@ -25,16 +25,17 @@ public class HttpMultiThreadFairyLand {
 
     @ToExplore
     public void entrance(int threadNum, long lastTimeMs) {
+        log.info("Start: threadNum[{}],lastTimeMs:[{}]", threadNum, lastTimeMs);
         CountDownLatch fence = new CountDownLatch(threadNum);
         Stat stat = new Stat(threadNum, lastTimeMs);
-        List<Thread> threadList=new ArrayList<>();
-        HttpMultiThreadArgs args=new HttpMultiThreadArgs(lastTimeMs,stat);
+        List<Thread> threadList = new ArrayList<>();
+        HttpMultiThreadArgs args = new HttpMultiThreadArgs(lastTimeMs, stat);
         for (int i = 0; i < threadNum; i++) {
-            Thread thread=new HttpMultiThreadRunner(args,i);
+            Thread thread = new HttpMultiThreadRunner(args, i);
             threadList.add(thread);
             thread.start();
         }
-        threadList.forEach(e-> {
+        threadList.forEach(e -> {
             try {
                 e.join();
             } catch (InterruptedException ex) {
@@ -42,5 +43,6 @@ public class HttpMultiThreadFairyLand {
             }
         });
         stat.writeFileResult(resultPath, fileName);
+        log.info("result:{}",stat.getResult());
     }
 }
