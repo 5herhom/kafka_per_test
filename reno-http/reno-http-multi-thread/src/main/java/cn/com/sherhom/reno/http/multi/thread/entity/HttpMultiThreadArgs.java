@@ -1,4 +1,4 @@
-package cn.com.sherhom.reno.http.mutil.thread.entity;
+package cn.com.sherhom.reno.http.multi.thread.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

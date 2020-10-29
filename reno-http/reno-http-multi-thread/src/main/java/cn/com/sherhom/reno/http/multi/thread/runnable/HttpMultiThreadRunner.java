@@ -1,13 +1,11 @@
-package cn.com.sherhom.reno.http.mutil.thread.runnable;
+package cn.com.sherhom.reno.http.multi.thread.runnable;
 
 import cn.com.sherhom.reno.http.common.record.Stat;
 import cn.com.sherhom.reno.http.common.utils.HttpConfUtil;
 import cn.com.sherhom.reno.http.common.utils.HttpUtils;
-import cn.com.sherhom.reno.http.mutil.thread.entity.HttpMultiThreadArgs;
+import cn.com.sherhom.reno.http.multi.thread.entity.HttpMultiThreadArgs;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
-
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author Sherhom

@@ -1,10 +1,9 @@
-package cn.com.sherhom.reno.http.mutil.thread;
+package cn.com.sherhom.reno.http.multi.thread;
 
 import cn.com.sherhom.reno.boot.RenoApplication;
-import cn.com.sherhom.reno.boot.annonation.ToExplore;
 import cn.com.sherhom.reno.boot.provider.CaseProvider;
 import cn.com.sherhom.reno.boot.provider.ProviderBuilder;
-import cn.com.sherhom.reno.http.mutil.thread.fairyland.HttpMultiThreadFairyLand;
+import cn.com.sherhom.reno.http.multi.thread.fairyland.HttpMultiThreadFairyLand;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;

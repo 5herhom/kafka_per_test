@@ -1,11 +1,11 @@
-package cn.com.sherhom.reno.http.mutil.thread.fairyland;
+package cn.com.sherhom.reno.http.multi.thread.fairyland;
 
 import cn.com.sherhom.reno.boot.annonation.ToExplore;
 import cn.com.sherhom.reno.common.utils.DateUtil;
 import cn.com.sherhom.reno.http.common.record.Stat;
 import cn.com.sherhom.reno.http.common.utils.HttpConfUtil;
-import cn.com.sherhom.reno.http.mutil.thread.entity.HttpMultiThreadArgs;
-import cn.com.sherhom.reno.http.mutil.thread.runnable.HttpMultiThreadRunner;
+import cn.com.sherhom.reno.http.multi.thread.entity.HttpMultiThreadArgs;
+import cn.com.sherhom.reno.http.multi.thread.runnable.HttpMultiThreadRunner;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
