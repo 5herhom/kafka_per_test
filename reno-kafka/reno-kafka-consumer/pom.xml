@@ -42,7 +42,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>cn.com.sherhom.reno.kafka.consumer.RenoConsumerMain</mainClass>
+                            <mainClass>cn.com.sherhom.reno.kafka.consumer.RenoJustConsumerMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -75,7 +75,7 @@
 <!--                    <archive>-->
 <!--                        <manifest>-->
 <!--                            &lt;!&ndash; 主函数的入口 &ndash;&gt;-->
-<!--                            <mainClass>cn.com.sherhom.reno.kafka.consumer.RenoConsumerMain</mainClass>-->
+<!--                            <mainClass>cn.com.sherhom.reno.kafka.consumer.RenoJustConsumerMain</mainClass>-->
 <!--                            <useUniqueVersions>false</useUniqueVersions>-->
 <!--                            &lt;!&ndash; 打包jar文件时，配置manifest文件，加入lib包的jar依赖 配置 &ndash;&gt;-->
 <!--                            <addClasspath>true</addClasspath>-->
@@ -112,7 +112,7 @@
 <!--                    <archive>-->
 <!--                        <manifest>-->
 <!--                            &lt;!&ndash; 主函数的入口 &ndash;&gt;-->
-<!--                            <mainClass>cn.com.sherhom.reno.kafka.consumer.RenoConsumerMain</mainClass>-->
+<!--                            <mainClass>cn.com.sherhom.reno.kafka.consumer.RenoJustConsumerMain</mainClass>-->
 <!--                            <useUniqueVersions>false</useUniqueVersions>-->
 <!--                            &lt;!&ndash; 打包jar文件时，配置manifest文件，加入lib包的jar依赖 配置 &ndash;&gt;-->
 <!--                            <addClasspath>true</addClasspath>-->

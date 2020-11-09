@@ -36,4 +36,10 @@ public class CommonTest {
         log.info("Result:{}",KfkOperate.createTopic(param));
 
     }
+    @Test
+    public void getTopicPartitionSizeTest(){
+        String zkServers="47.96.65.208:2181,150.158.119.99:2181";
+        String topicName="HZY_TEST";
+        log.info("Result:{}",KfkOperate.getTopicPartition(zkServers,topicName));
+    }
 }
