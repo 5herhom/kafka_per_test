@@ -152,6 +152,7 @@ public class KafkaProducerFairyLand {
                 KfkOperate.alterConfig(topicSimpleInfo,paramProperties);
                 log.info("Alter topic {} 's retention ms to {}",topicName,retenMs);
             }
+            KfkOperate.clearTopicData(zkServer,topicName);
         }
         catch (Exception e){
             LogUtil.printStackTrace(e);

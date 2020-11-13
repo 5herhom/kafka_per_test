@@ -1,4 +1,4 @@
-package cn.com.sherhom.reno.kafka.producer.opt;
+package cn.com.sherhom.reno.kafka.common.service;
 
 import cn.com.sherhom.reno.kafka.common.callback.ProducerCallback;
 import cn.com.sherhom.reno.kafka.common.record.Stat;
@@ -32,5 +32,20 @@ public class ProducerOpt {
         }
         producer.close();
         return !stat.isFailed();
+    }
+
+    public static boolean sendMsg(Producer producer, String topicName, int size, long num, long throughput ){
+        byte[] msg= MsgUtil.getBytes(size);
+        long startMs = System.currentTimeMillis();
+        ThroughputThrottler throttler = new ThroughputThrottler(throughput, startMs);
+        for(int i=0;i<num;i++){
+            ProducerRecord<String,byte[]> record=new ProducerRecord<>(topicName,null,msg);
+            long sendStartMs = System.currentTimeMillis();
+            producer.send(record);
+            if (throttler.shouldThrottle(i, sendStartMs)) {
+                throttler.throttle();
+            }
+        }
+        return true;
     }
 }

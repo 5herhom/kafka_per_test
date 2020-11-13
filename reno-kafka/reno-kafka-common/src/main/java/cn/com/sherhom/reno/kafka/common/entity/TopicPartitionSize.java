@@ -17,4 +17,12 @@ import java.util.Map;
 public class TopicPartitionSize {
     protected String topicName;
     protected Map<Integer,Long> partition2Size=new HashMap<>();
+    public boolean isTopicEmpty(){
+        for (Map.Entry<Integer, Long> e:
+        partition2Size.entrySet()){
+            if(e.getValue()!=0)
+                return false;
+        }
+        return true;
+    }
 }

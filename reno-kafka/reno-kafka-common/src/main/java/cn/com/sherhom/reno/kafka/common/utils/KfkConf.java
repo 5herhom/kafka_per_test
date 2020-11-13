@@ -33,4 +33,9 @@ public class KfkConf {
     public static String kfkIp(){
         return ConfUtil.get(KFK_IP_KEY,"localhost:9092");
     }
+
+    public static final String CONSUMER_SIZE="reno.kafka.consumer.size";
+    public static long getConsumerSize(){
+        return ConfUtil.getLong(CONSUMER_SIZE,1048576);
+    }
 }

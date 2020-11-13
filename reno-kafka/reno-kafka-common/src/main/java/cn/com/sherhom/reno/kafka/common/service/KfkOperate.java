@@ -1,6 +1,7 @@
 package cn.com.sherhom.reno.kafka.common.service;
 import static cn.com.sherhom.reno.kafka.common.entity.BrokerLogDirInfo.*;
 import cn.com.sherhom.reno.common.utils.Asset;
+import cn.com.sherhom.reno.common.utils.CollectionUtils;
 import cn.com.sherhom.reno.common.utils.LogUtil;
 import cn.com.sherhom.reno.kafka.common.callback.ProducerCallback;
 import cn.com.sherhom.reno.kafka.common.constants.ZkPathConst;
@@ -15,9 +16,11 @@ import cn.com.sherhom.reno.kafka.common.utils.ZkUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import kafka.utils.ZkUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
  * @author Sherhom
  * @date 2020/9/4 10:12
  */
+@Slf4j
 public class KfkOperate {
     public static TopicSimpleInfo getTopicSimpleInfo(String zkServers, String topicName) {
         CuratorFramework zkCli = ZkCuratorHolder.getZkCli(zkServers);
@@ -53,6 +57,15 @@ public class KfkOperate {
         topicSimpleInfo.setPartNum(t2p.getJSONObject("partitions").size());
         topicSimpleInfo.setReplicationNum(t2p.getJSONObject("partitions").getJSONArray("0").size());
         return topicSimpleInfo;
+    }
+    public static TopicPartitionSize getTopicPartitionSize(String zkServers,String topicName){
+        List<TopicPartitionSize> list=getTopicPartitionSize(zkServers,e->e.getKey().equals(topicName));
+        if(CollectionUtils.isEmpty(list))
+                return null;
+        return list.get(0);
+    }
+    public static List<TopicPartitionSize> getTopicPartitionSize(String zkServers){
+        return getTopicPartitionSize(zkServers,e->true);
     }
     public static List<TopicPartitionSize> getTopicPartitionSize(String zkServers, Predicate<HashMap.Entry<String,Map<Integer,Long>>> predicate){
         CuratorFramework zkCli = ZkCuratorHolder.getZkCli(zkServers);
@@ -145,5 +158,51 @@ public class KfkOperate {
         ZkUtils zkUtils=new ZkUtils(zkClient,new ZkConnection(simpleInfo.getZkServers()),false);
         Properties config=KfkOperate4scala.descConfig(simpleInfo.getTopicName(),zkUtils);
         return config;
+    }
+
+    public static boolean clearTopicData(String zkServers, String topicName){
+        log.info("Start to clean.");
+        StopWatch sw=new StopWatch();
+        sw.start();
+        TopicSimpleInfo topicSimpleInfo = KfkOperate.getTopicSimpleInfo(zkServers, topicName);
+        if(topicSimpleInfo==null)
+            return false;
+        Properties properties=KfkOperate.descConfig(topicSimpleInfo);
+        long retenMs=-1l;
+        if(properties!=null||!properties.contains("retention.ms")){
+            retenMs= Long.valueOf(properties.getProperty("retention.ms","-1"));
+        }
+        //清空topic数据
+        Properties paramProperties=new Properties();
+        paramProperties.setProperty("retention.ms","0");
+        KfkOperate.alterConfig(topicSimpleInfo,paramProperties);
+        TopicPartitionSize topicPartitionSize=getTopicPartitionSize(zkServers,topicName);
+        long startTime=System.currentTimeMillis();
+        long overTime=10000;
+        int maxRetry=10000;
+        int n=0;
+        //检测是否清理
+        while(!topicPartitionSize.isTopicEmpty()&&n<maxRetry){
+            if(overTime<=System.currentTimeMillis()-startTime){
+                paramProperties.setProperty("retention.ms","0");
+                KfkOperate.alterConfig(topicSimpleInfo,paramProperties);
+                KfkOperate.alterConfig(topicSimpleInfo,paramProperties);
+                startTime=System.currentTimeMillis();
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                n++;
+            }
+            topicPartitionSize=getTopicPartitionSize(zkServers,topicName);
+        }
+        sw.stop();
+        log.info("Clean cost:{} ms",sw.getTime());
+        //设置回来
+        paramProperties.setProperty("retention.ms",String.valueOf(retenMs));
+        if(retenMs!=-1)
+            KfkOperate.alterConfig(topicSimpleInfo,paramProperties);
+        return topicPartitionSize.isTopicEmpty();
     }
 }
