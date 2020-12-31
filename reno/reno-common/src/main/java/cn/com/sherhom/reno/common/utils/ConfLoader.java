@@ -56,14 +56,15 @@ public class ConfLoader {
                                 StringUtils.dirPathEnd(dir)+
                                 fileName);
                 urlLoader= URLLoaderFactory.getInstance(path);
-                InputStream inputStream=urlLoader.getInStream();
-                if(inputStream==null){
+                in=urlLoader.getInStream();
+                if(in==null){
                     log.info("Config file is not existed in [{}]",urlLoader.getUrl());
                     continue;
                 }
 //                in = new FileInputStream(inputStream);
-                pros.load(inputStream);
-                log.info("Config is found in {}",urlLoader.getUrl());
+                pros.load(in);
+                log.info("Config is found in {},absolute path:{}",urlLoader.getUrl(),urlLoader
+                .getAbsolutePath());
                 break;
             } catch (FileNotFoundException e) {
                 log.warn(e.getMessage());
