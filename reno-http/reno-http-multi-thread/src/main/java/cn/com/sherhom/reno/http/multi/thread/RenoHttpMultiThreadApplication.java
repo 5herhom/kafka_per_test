@@ -27,7 +27,7 @@ public class RenoHttpMultiThreadApplication {
 //                Stream.of(10000l,900000l).collect(Collectors.toList())
 //        ).build();
         CaseProvider lastTimeMsProvide=new ProviderBuilder<Long>().fieldType(ProviderBuilder.ProviderType.LIST).cases(
-                Stream.of(10000l).collect(Collectors.toList())
+                Stream.of(1000l).collect(Collectors.toList())
         ).build();
         providers.add(lastTimeMsProvide);
 

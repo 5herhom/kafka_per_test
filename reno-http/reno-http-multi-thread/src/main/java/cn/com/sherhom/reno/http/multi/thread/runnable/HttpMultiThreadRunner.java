@@ -1,6 +1,6 @@
 package cn.com.sherhom.reno.http.multi.thread.runnable;
 
-import cn.com.sherhom.reno.http.common.record.Stat;
+import cn.com.sherhom.reno.boot.record.TimeCostStat;
 import cn.com.sherhom.reno.http.common.utils.HttpConfUtil;
 import cn.com.sherhom.reno.http.common.utils.HttpUtils;
 import cn.com.sherhom.reno.http.multi.thread.entity.HttpMultiThreadArgs;
@@ -26,7 +26,7 @@ public class HttpMultiThreadRunner extends Thread {
     @Override
     public void run() {
         Long lastTimeMs=args.getLastTimeMs();
-        Stat stat=args.getStat();
+        TimeCostStat stat=args.getStat();
         stat.start();
         Long endTime=System.currentTimeMillis()+lastTimeMs;
         StopWatch sw;

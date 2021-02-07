@@ -4,8 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.concurrent.CountDownLatch;
-import cn.com.sherhom.reno.http.common.record.Stat;
+import cn.com.sherhom.reno.boot.record.TimeCostStat;
 /**
  * @author Sherhom
  * @date 2020/10/28 13:56
@@ -15,5 +14,5 @@ import cn.com.sherhom.reno.http.common.record.Stat;
 @NoArgsConstructor
 public class HttpMultiThreadArgs {
     Long lastTimeMs;
-    Stat stat;
+    TimeCostStat stat;
 }

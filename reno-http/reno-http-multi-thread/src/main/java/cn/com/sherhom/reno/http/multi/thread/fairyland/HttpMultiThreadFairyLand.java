@@ -2,7 +2,7 @@ package cn.com.sherhom.reno.http.multi.thread.fairyland;
 
 import cn.com.sherhom.reno.boot.annonation.ToExplore;
 import cn.com.sherhom.reno.common.utils.DateUtil;
-import cn.com.sherhom.reno.http.common.record.Stat;
+import cn.com.sherhom.reno.boot.record.TimeCostStat;
 import cn.com.sherhom.reno.http.common.utils.HttpConfUtil;
 import cn.com.sherhom.reno.http.multi.thread.entity.HttpMultiThreadArgs;
 import cn.com.sherhom.reno.http.multi.thread.runnable.HttpMultiThreadRunner;
@@ -27,7 +27,7 @@ public class HttpMultiThreadFairyLand {
     public void entrance(int threadNum, long lastTimeMs) {
         log.info("Start: threadNum[{}],lastTimeMs:[{}]", threadNum, lastTimeMs);
         CountDownLatch fence = new CountDownLatch(threadNum);
-        Stat stat = new Stat(threadNum, lastTimeMs);
+        TimeCostStat stat = new TimeCostStat(threadNum);
         List<Thread> threadList = new ArrayList<>();
         HttpMultiThreadArgs args = new HttpMultiThreadArgs(lastTimeMs, stat);
         for (int i = 0; i < threadNum; i++) {
