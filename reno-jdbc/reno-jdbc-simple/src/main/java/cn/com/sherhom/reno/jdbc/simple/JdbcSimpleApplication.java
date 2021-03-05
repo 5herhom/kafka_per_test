@@ -42,7 +42,7 @@ public class JdbcSimpleApplication {
         providers.add(rowNumProvide);
 //      threadNum
         CaseProvider threadNumProvide=new ProviderBuilder<Integer>().fieldType(ProviderBuilder.ProviderType.LIST).cases(
-                Stream.of(1,5).collect(Collectors.toList())
+                Stream.of(1,5,10).collect(Collectors.toList())
         ).build();
         providers.add(threadNumProvide);
 

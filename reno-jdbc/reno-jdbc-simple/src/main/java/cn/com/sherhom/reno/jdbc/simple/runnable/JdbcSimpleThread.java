@@ -69,6 +69,7 @@ public class JdbcSimpleThread extends Thread {
                 end=System.currentTimeMillis();
                 stat.recordMs(end-start);
                 stat.recordSuccess();
+                stat.middleEndLoop();
             } catch (SQLException e) {
                 LogUtil.printStackTrace(e);
                 stat.recordFail();

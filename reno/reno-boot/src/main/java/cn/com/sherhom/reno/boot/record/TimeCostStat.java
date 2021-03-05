@@ -31,6 +31,7 @@ import static cn.com.sherhom.reno.common.mapper.CsvMapper.DEFAULT_TIME_COST_CSV_
 public class TimeCostStat {
     protected int threadNum;
     CountDownLatch startFence;
+    CountDownLatch middleFence;
     CountDownLatch endFence;
     boolean started;
     ThreadLocal<List<Long>> localCostTimeList = new ThreadLocal<>();
@@ -50,16 +51,18 @@ public class TimeCostStat {
     public TimeCostStat(int threadNum) {
         this(threadNum, DEFAULT_TIME_COST_CSV_MAPPER, null);
     }
-    public TimeCostStat(int threadNum,  List<Pair<String,String>> csvMapper,List<Integer> percentList) {
+
+    public TimeCostStat(int threadNum, List<Pair<String, String>> csvMapper, List<Integer> percentList) {
         this.threadNum = threadNum;
         this.startFence = new CountDownLatch(threadNum);
         this.endFence = new CountDownLatch(threadNum);
+        this.middleFence = new CountDownLatch(threadNum);
         if (percentList == null) {
             this.percentList = Stream.of(95, 90, 85, 80, 75, 70, 60, 30, 20).collect(Collectors.toList());
         } else {
             this.percentList = percentList;
         }
-        this.csvMapper =csvMapper;
+        this.csvMapper = csvMapper;
         //init result line.
         percentList.forEach(quartile ->
                 this.csvMapper.add(new Pair<>(quartileLineName(quartile), quartileLineName(quartile))));
@@ -71,7 +74,7 @@ public class TimeCostStat {
         try {
             startFence.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LogUtil.printStackTrace(e);
         }
         if (!started) {
             synchronized (startFence) {
@@ -92,12 +95,30 @@ public class TimeCostStat {
         return list;
     }
 
+    public void middleEndLoop() {
+        CountDownLatch fence = this.middleFence;
+        fence.countDown();
+        try{
+            fence.await();
+        }
+        catch (InterruptedException e){
+            LogUtil.printStackTrace(e);
+        }
+        synchronized (fence){
+            CountDownLatch curFence=this.middleFence;
+            if(curFence.getCount()==0){
+                this.middleFence=new CountDownLatch(threadNum);
+                log.info("Loop end.");
+            }
+        }
+    }
+
     public void stop() {
         endFence.countDown();
         try {
             endFence.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LogUtil.printStackTrace(e);
         }
         synchronized (endFence) {
             if (started) {
@@ -141,9 +162,10 @@ public class TimeCostStat {
     }
 
 
-    public JSONObject getResult(){
+    public JSONObject getResult() {
         return getResult(null);
     }
+
     public JSONObject getResult(Map map) {
         if (started)
             throw new RenoException("The stat should get result when stopped.");
@@ -172,16 +194,18 @@ public class TimeCostStat {
     public static String quartileLineName(int quartile) {
         return MessageFormat.format("P{0}", quartile);
     }
-    public void writeFileResult(String path, String fileName){
-        writeFileResult(path,fileName,null);
+
+    public void writeFileResult(String path, String fileName) {
+        writeFileResult(path, fileName, null);
     }
-    public void writeFileResult(String path, String fileName,Map extInfo) {
+
+    public void writeFileResult(String path, String fileName, Map extInfo) {
         CsvWriter resultWriter = new CsvWriter(FileUtil.getPathAndFile(path, fileName), resultLine);
         try {
             resultWriter.open();
             if (resultWriter.isShouldCreate())
                 resultWriter.writeHeader();
-            JSONObject result=getResult(extInfo);
+            JSONObject result = getResult(extInfo);
             resultWriter.writeLine(result);
         } catch (Exception e) {
             LogUtil.printStackTrace(e);
