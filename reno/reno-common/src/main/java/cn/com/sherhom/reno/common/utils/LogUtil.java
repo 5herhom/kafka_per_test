@@ -9,8 +9,8 @@ import org.slf4j.Logger;
  */
 @Slf4j
 public class LogUtil {
-    public static void printStackTrace(Logger log,Throwable e) {
-        log.error(ExceptionUtil.toStackTraceString(e));
+    public static void printStackTrace(Logger logger,Throwable e) {
+        logger.error(ExceptionUtil.toStackTraceString(e));
     }
     public static void printStackTrace(Throwable e) {
         log.error(ExceptionUtil.toStackTraceString(e));
