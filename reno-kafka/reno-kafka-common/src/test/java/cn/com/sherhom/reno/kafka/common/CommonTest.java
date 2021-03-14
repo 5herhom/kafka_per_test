@@ -12,6 +12,8 @@ import org.junit.Test;
  */
 @Slf4j
 public class CommonTest {
+
+    static final String zkServer="47.96.65.208:2181,150.158.119.99:2181";
     @Test
     public void topicSimpleInfoTest(){
         String zkServers="47.96.65.208:2181,150.158.119.99:2181";
@@ -35,5 +37,23 @@ public class CommonTest {
 
         log.info("Result:{}",KfkOperate.createTopic(param));
 
+    }
+    @Test
+    public void getTopicPartitionSizeTest01(){
+        String zkServers="47.96.65.208:2181,150.158.119.99:2181";
+        log.info("Result:{}",KfkOperate.getTopicPartitionSize(zkServers));
+    }
+    @Test
+    public void getTopicPartitionSizeTest(){
+        String zkServers="47.96.65.208:2181,150.158.119.99:2181";
+        String topicName="HZY_TEST";
+        log.info("Result:{}",KfkOperate.getTopicPartitionSize(zkServers,topicName));
+        log.info("Result:{}",KfkOperate.getTopicPartitionSize(zkServers,topicName).isTopicEmpty());
+    }
+
+    @Test
+    public void clearTopicTest(){
+        String topicName="HZY_TEST";
+        KfkOperate.clearTopicData(zkServer,topicName);
     }
 }

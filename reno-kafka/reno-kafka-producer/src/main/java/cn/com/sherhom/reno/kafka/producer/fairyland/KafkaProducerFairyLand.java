@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 @Slf4j
 public class KafkaProducerFairyLand {
@@ -24,17 +25,17 @@ public class KafkaProducerFairyLand {
             "RENO_TEST_TOPIC_PARTITION_%s_%s";
     public static final String zkServer = KfkConf.zkIp();
 
-    private final String resultPath = ProConf.reportPath();
+    private final String resultPath = ProConf.reportPath() + "/" + DateUtil.date2String(new Date());
     private final String fileName = "reno_kfk_producer_result_" + DateUtil.date2String(new Date()) + ".csv";
-
+    private final long retenMs=900000;
     @ToExplore
     public void entrance(int topicNum,
                          int partitionNum,
                          int producerNum,
                          int consumerNum,
                          int bytePerMsg,
-                         int bytePerSecInput,//b/s
-                         int bytePerSecOutput) {
+                         long bytePerSecInput,//b/s
+                         long bytePerSecOutput) {
         List<String> topics = new ArrayList<>();
         List<ProducerThread> proThreads = new ArrayList<>();
         List conThreads = new ArrayList<>();
@@ -48,13 +49,13 @@ public class KafkaProducerFairyLand {
         }
         //2.create threads
 //        ProducerRunnerArgs proArgs;
-        Stat stat = new Stat(0, 0, ProConf.reportInterval(), producerNum, ProConf.isReportToFile(), ProConf.reportPath());
+        Stat stat = new Stat(0, 0, ProConf.reportInterval(), producerNum, ProConf.isReportToFile(), resultPath);
         try {
-            int numOfMsg = ProConf.allKbSize() * 1024 / bytePerMsg;
-            int throughput = bytePerSecInput / bytePerMsg;
+            long numOfMsg = ProConf.allKbSize() * 1024 / bytePerMsg;
+            long throughput = bytePerSecInput / bytePerMsg;
 
-            int singleBatchSize = numOfMsg / producerNum;
-            int singleThroughput = throughput / producerNum;
+            long singleBatchSize = numOfMsg / producerNum / topicNum +1;
+            long singleThroughput = throughput / producerNum / topicNum+1;
             topics.forEach((t) -> {
                         for (int i = 0; i < producerNum; i++) {
                             ProducerRunnerArgs proArgs = new ProducerRunnerArgs();
@@ -92,16 +93,21 @@ public class KafkaProducerFairyLand {
             resultMetric.setBytePerSecInput(bytePerSecInput);
             resultMetric.setBytePerSecOutput(bytePerSecOutput);
             resultMetric.setActualInput(stat.getBytePerSec());
-            resultMetric.setInputDiff(bytePerSecInput - stat.getBytePerSec());
-            resultMetric.setActualOutput(0);
-            resultMetric.setOutputDiff(0);
+            resultMetric.setInputDiff(stat.getBytePerSec() - bytePerSecInput);
+            resultMetric.setInputDiffPercent((stat.getBytePerSec() - bytePerSecInput) / (double) bytePerSecInput);
+            resultMetric.setActualOutput(0l);
+            resultMetric.setOutputDiff(0l);
+            resultMetric.setOutputDiffPercent(0.0);
+            resultMetric.setExecuteTime(stat.getElapse());
             resultMetric.setSuccess(!stat.isFailed());
+            resultMetric.setDetailLogPath(stat.getFilePath());
             if (stat.isFailed())
                 log.error("Case failed!");
-            CsvWriter resultWriter = new CsvWriter(FileUtil.getPathAndFile(ProConf.reportPath(), fileName), ListCSVHolder.resultCsvLine);
-            try{
+            CsvWriter resultWriter = new CsvWriter(FileUtil.getPathAndFile(resultPath, fileName), ListCSVHolder.resultCsvLine);
+            try {
                 resultWriter.open();
-                resultWriter.writeHeader();
+                if (resultWriter.isShouldCreate())
+                    resultWriter.writeHeader();
                 resultWriter.writeLine(resultMetric);
             } catch (Exception e) {
                 LogUtil.printStackTrace(e);
@@ -120,21 +126,39 @@ public class KafkaProducerFairyLand {
     }
 
     public void prepareTopic(String topicName, int partitionNum) {
-        TopicSimpleInfo topicSimpleInfo = KfkOperate.getTopicSimpleInfo(zkServer, topicName);
-        TopicSimpleInfo param;
-        if (topicSimpleInfo == null) {
-            param = new TopicSimpleInfo();
-            param.setTopicName(topicName);
-            param.setPartNum(partitionNum);
-            param.setReplicationNum(2);
-            param.setZkServers(KfkConf.zkIp());
-            Asset.isTrue(KfkOperate.createTopic(param),
-                    String.format("Topic[{}] create error.", topicName));
-        } else if (topicSimpleInfo.getPartNum() < partitionNum) {
-            Asset.isTrue(KfkOperate.expandPartitions(zkServer, topicName, partitionNum),
-                    String.format("Fail to expand partition from {} to {}, for topic[{}]",
-                            topicSimpleInfo.getPartNum(), partitionNum, topicName));
+        try{
+            TopicSimpleInfo topicSimpleInfo = KfkOperate.getTopicSimpleInfo(zkServer, topicName);
+            TopicSimpleInfo param;
+            if (topicSimpleInfo == null) {
+                param = new TopicSimpleInfo();
+                param.setTopicName(topicName);
+                param.setPartNum(partitionNum);
+                param.setReplicationNum(2);
+                param.setZkServers(KfkConf.zkIp());
+                Asset.isTrue(KfkOperate.createTopic(param),
+                        String.format("Topic[{}] create error.", topicName));
+                topicSimpleInfo = KfkOperate.getTopicSimpleInfo(zkServer, topicName);
+
+            } else if (topicSimpleInfo.getPartNum() < partitionNum) {
+                Asset.isTrue(KfkOperate.expandPartitions(zkServer, topicName, partitionNum),
+                        String.format("Fail to expand partition from {} to {}, for topic[{}]",
+                                topicSimpleInfo.getPartNum(), partitionNum, topicName));
+            }
+            Properties properties=KfkOperate.descConfig(topicSimpleInfo);
+            if(properties==null||!properties.contains("retention.ms")||
+            Long.valueOf(properties.getProperty("retention.ms"))!=retenMs){
+                Properties paramProperties=new Properties();
+                paramProperties.setProperty("retention.ms",String.valueOf(retenMs));
+                KfkOperate.alterConfig(topicSimpleInfo,paramProperties);
+                log.info("Alter topic {} 's retention ms to {}",topicName,retenMs);
+            }
+            KfkOperate.clearTopicData(zkServer,topicName);
         }
+        catch (Exception e){
+            LogUtil.printStackTrace(e);
+            throw new RenoException(e);
+        }
+
     }
 
 }

@@ -17,11 +17,15 @@ public class ResultMetric {
     Integer producerNum;
     Integer consumerNum;
     Integer bytePerMsg;
-    Integer bytePerSecInput;
-    Integer bytePerSecOutput;
-    Integer actualInput;
-    Integer inputDiff;
-    Integer actualOutput;
-    Integer outputDiff;
+    Long bytePerSecInput;
+    Long bytePerSecOutput;
+    Long actualInput;
+    Long inputDiff;
+    Double inputDiffPercent;
+    Long actualOutput;
+    Long outputDiff;
+    Double outputDiffPercent;
+    Long executeTime;
     Boolean success;
+    String detailLogPath;
 }

@@ -1,6 +1,7 @@
 package cn.com.sherhom.reno.kafka.common.holder;
 
 import cn.com.sherhom.reno.common.entity.Pair;
+import cn.com.sherhom.reno.common.utils.ListCSVLine;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,8 +31,12 @@ public class ListCSVHolder {
             new Pair<>("expectOutput(byte/sec)", "bytePerSecOutput"),
             new Pair<>("actualInput(byte/sec)", "actualInput"),
             new Pair<>("inputDiff(byte/sec)", "inputDiff"),
+            new Pair<>("inputDiffPercent(%)", "inputDiffPercent"),
             new Pair<>("actualOutput(byte/sec)", "actualOutput"),
             new Pair<>("outputDiff(byte/sec)", "outputDiff"),
-            new Pair<>("success", "success")
+            new Pair<>("outputDiffPercent(%)", "outputDiffPercent"),
+            new Pair<>("executeTime(s)", "executeTime"),
+            new Pair<>("success", "success"),
+            new Pair<>("detailLogPath", "detailLogPath")
     ).collect(Collectors.toList()),"\t");
 }

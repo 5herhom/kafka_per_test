@@ -14,6 +14,9 @@
             <PatternLayout pattern="${common.pattern}"/>
             <!--            <PatternLayout pattern="%d %-5p [%t] %-5level %C{2} (%F:%L) - %msg%n"/>-->
             <!--            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
+            <Filters>
+                <ThresholdFilter level="${common.level}" onMatch="NEUTRAL" onMismatch="DENY"/>
+            </Filters>
         </Console>
         <RollingRandomAccessFile name="global.log"
                                  fileName="${base.path}/${common.file.name}.log"

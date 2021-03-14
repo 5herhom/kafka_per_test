@@ -4,6 +4,7 @@ import cn.com.sherhom.reno.boot.annonation.ToExplore;
 import cn.com.sherhom.reno.boot.provider.CaseProvider;
 import cn.com.sherhom.reno.boot.provider.ProviderBuilder;
 import cn.com.sherhom.reno.common.exception.RenoException;
+import cn.com.sherhom.reno.common.utils.ConfUtil;
 import cn.com.sherhom.reno.common.utils.LogUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -49,5 +50,9 @@ public class RunTest {
 //            LogUtil.printStackTrace(new RenoException("bbb"));
             LogUtil.printStackTrace(log,new RenoException("bbb"));
         }
+    }
+    @Test
+    public void confTest(){
+        log.info(ConfUtil.get("zookeeper.server.ip"));
     }
 }

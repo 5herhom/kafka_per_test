@@ -53,6 +53,7 @@ public class RenoApplication {
         if(deep==providers.size()){
             methodToExplore.setAccessible(true);
             try {
+                log.info("Run method [{}],args:{}",methodToExplore.toString(),args);
                 methodToExplore.invoke(fairyland, args.toArray());
                 return;
             } catch (Exception e) {

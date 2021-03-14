@@ -2,7 +2,7 @@ package cn.com.sherhom.reno.kafka.producer.runner;
 
 import cn.com.sherhom.reno.kafka.common.service.ProducerFactory;
 import cn.com.sherhom.reno.kafka.producer.entity.ProducerRunnerArgs;
-import cn.com.sherhom.reno.kafka.producer.opt.ProducerOpt;
+import cn.com.sherhom.reno.kafka.common.service.ProducerOpt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.Producer;
 
