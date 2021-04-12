@@ -42,12 +42,13 @@ public class RunTest {
 
     @Test
     public void logTest(){
-        log.info("startlog");
+//        log.info("startlog");
         try{
 
             throw new RenoException("aaaa");
         } catch (Exception e) {
-            LogUtil.printStackTrace(new RenoException("bbb"));
+//            LogUtil.printStackTrace(new RenoException("bbb"));
+            LogUtil.printStackTrace(log,new RenoException("bbb"));
         }
     }
     @Test
