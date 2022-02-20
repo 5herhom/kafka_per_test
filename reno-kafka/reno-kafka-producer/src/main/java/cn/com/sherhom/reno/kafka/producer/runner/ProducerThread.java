@@ -14,7 +14,7 @@ public class ProducerThread extends Thread{
     ProducerRunnerArgs args;
     @Override
     public void run() {
-        Producer producer= new ProducerFactory<String,byte[]>().newProducer();
+        Producer producer= ProducerFactory.newProducer();
         ProducerOpt.sendMsg(producer,args.getTopicName(),args.getRecordSize(),args.getNum(),args.getThroughput(),args.getStat());
         log.info("start to close.");
         producer.close();

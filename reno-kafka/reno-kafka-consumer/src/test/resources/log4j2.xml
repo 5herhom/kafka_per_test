@@ -2,7 +2,7 @@
 <Configuration>
     <Properties>
         <Property name="common.pattern">%d{DEFAULT} %level %C %L [%t] %msg%n</Property>
-        <Property name="base.path">logs/producer</Property>
+        <Property name="base.path">logs/consumer</Property>
         <Property name="common.level">INFO</Property>
         <Property name="common.file.name">reno-kafka</Property>
         <Property name="error.file.name">${common.file.name}-error</Property>

@@ -39,6 +39,30 @@ public class CommonTest {
 
     }
     @Test
+    public void createTopicTest01(){
+        TopicSimpleInfo param;
+        param=new TopicSimpleInfo();
+        param.setTopicName("Sherhom-01");
+        param.setPartNum(2);
+        param.setReplicationNum(2);
+        param.setZkServers("10.16.6.185:2181,10.16.6.188:2181,10.16.6.189:2181/kafka-sherhom");
+
+        log.info("Result:{}",KfkOperate.createTopic(param));
+
+    }
+    @Test
+    public void createTopicTest02(){
+        TopicSimpleInfo param;
+        param=new TopicSimpleInfo();
+        param.setTopicName("Sherhom-01");
+        param.setPartNum(2);
+        param.setReplicationNum(2);
+        param.setZkServers("10.16.6.185:2181,10.16.6.188:2181,10.16.6.189:2181/kafka-sherhom");
+
+        log.info("Result:{}",KfkOperate.createTopic(param));
+
+    }
+    @Test
     public void getTopicPartitionSizeTest01(){
         String zkServers="47.96.65.208:2181,150.158.119.99:2181";
         log.info("Result:{}",KfkOperate.getTopicPartitionSize(zkServers));

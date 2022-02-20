@@ -5,6 +5,8 @@ import cn.com.sherhom.reno.kafka.common.holder.ListCSVHolder;
 import cn.com.sherhom.reno.kafka.producer.fairyland.KafkaProducerFairyLand;
 import org.junit.Test;
 
+import static cn.com.sherhom.reno.common.contants.ConfKey.ACTIVE_PROFILE_KEY;
+
 /**
  * @author Sherhom
  * @date 2020/9/8 14:41
@@ -17,6 +19,13 @@ public class ProducerTest {
         );
     }
     @Test
+    public void localProduTest(){
+        System.setProperty(ACTIVE_PROFILE_KEY,"local");
+        new KafkaProducerFairyLand().entrance(
+                1,3,1,0,1*1024,160*1024,0
+        );
+    }
+    @Test
     public void CsvTest(){
         CsvWriter csvWriter=new CsvWriter("/data/reno/test.csv", ListCSVHolder.metricCsvLine);
         csvWriter.open();
@@ -24,4 +33,5 @@ public class ProducerTest {
         csvWriter.flush();
         csvWriter.close();
     }
+
 }
